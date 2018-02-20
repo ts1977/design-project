@@ -17,6 +17,7 @@ Crowning: When one of your checkers reaches the opposite side of the board, it i
 king can move backward as well as forward.
 
 Programming language: python or C++
+
 Algorithm: A+ algorithm, alpha beta algorithm, decision tree, neural networking
 
 Plan of project: 
