@@ -37,7 +37,7 @@ To achieve more advantageous situation, if there is no obligatory capture move, 
 2. prevent opponent changing the uncrown piece to crown piece
 3. increase the number of own pieces on the left or right edge because those pieces can't be captured
 4. prevent own pieces to be captured by opponent
-5. increase the total vertical moving distance from the starting position
+
 
 
 
