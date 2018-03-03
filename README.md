@@ -20,6 +20,29 @@ Programming language: python or C++
 
 Algorithm: A+ algorithm, alpha beta algorithm, decision tree, neural networking
 
+AI part: The ai improves itself by playing with human. After the ai plays with human, it adds the game records into its storage. In the ai turns, ai will analyse all of possible moves and select the move that has the highest winning probability.
+
+With playing with human, the ai can judge the states of game independently. The states includes 
+1. number of own uncrowned pieces. 
+2. number of opponent's uncrowned pieces. 
+3. number of own crowned pieces.
+4. number of opponent's crowned pieces. 
+5. number of own pieces on the right or left edge of the board 
+6. number of opponent's pieces on the right or left edge of the board 
+7. own piece which will be captured in next turn
+8. the total vertical moving distance from the starting position
+
+To achieve more advantageous situation, if there is no obligatory capture move, ai tends to make move following rules below.
+1. increase the number of own crown pieces
+2. prevent opponent changing the uncrown piece to crown piece
+3. increase the number of own pieces on the left or right edge because those pieces can't be captured
+4. prevent own pieces to be captured by opponent
+5. increase the total vertical moving distance from the starting position
+
+
+
+
+
 Plan of project: 
 First two weeks: learn some related machine learning and artificial intelligence knowledge 
 Second two weeks: make the GUI part of the checkers 
