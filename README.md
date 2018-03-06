@@ -13,7 +13,7 @@ Jumping: If the jump is available, you must take the jump. If one of your oppone
 checkers, and the next space beyond the opponent's checker us empty, then your checker must jump the opponent's checker and land in the
 space beyond.
 
-Crowning: When one of your checkers reaches the opposite side of the board, it is crowd a and becomes a King. Your turn ends there. The 
+Crowning: when one of your checkers reaches the opposite side of the board, it is crowd a and becomes a King. Your turn ends there. The 
 king can move backward as well as forward.
 
 Programming language: python or C++
