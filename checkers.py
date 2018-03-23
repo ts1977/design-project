@@ -124,10 +124,14 @@ class ChessBoard :
     def displayButton(self,win):
         rectangle = Rectangle(Point(100,800), Point(300,900))
         rectangle2 = Rectangle(Point(400, 800), Point(600,900))
+        rectangle3 = Rectangle(Point(700,800), Point(800, 900))
         rectangle.setFill("Green")
         rectangle2.setFill("Red")
+        rectangle3.setFill("gray")
         rectangle.draw(win)
         rectangle2.draw(win)
+        rectangle3.draw(win)
+
     def displayText(self, win):
         message = Text(Point(200,850), 'Begin')
         message.setTextColor('black')
@@ -139,10 +143,22 @@ class ChessBoard :
         message2.setTextColor('black')
         message2.setStyle('italic')
         message2.setSize(25)
-        message2.draw(win)       
+        message2.draw(win)
+        
+        message3 = Text(Point(800,850), 'Record')
+        message2.setTextColor('black')
+        message2.setStyle('italic')
+        message2.setSize(25)
+        message2.draw(win)    
 
     def displayError(self, win):
         message = Text(Point(800, 100), 'Invalid move')
+        message.setTextColor('red')
+        message.setStyle('italic')
+        message.setSize(25)
+        message.draw(win)
+    def displayError2(self, win):
+        message = Text(Point(800, 100), 'You must jump')
         message.setTextColor('red')
         message.setStyle('italic')
         message.setSize(25)
@@ -152,6 +168,7 @@ class ChessBoard :
         blank.setFill("white")
         blank.setOutline("white")
         blank.draw(win)
+
 
 
     """set choose chess to grey"""
@@ -199,6 +216,44 @@ class ChessBoard :
         for chess in self.m_player2.m_chesses:
             self.m_curBoard[chess.m_x][chess.m_y] = 'X'
 
+
+    def test_capture_player(self):
+        dir_player = [[1,-1],[1,1]]
+        dir_king_player = [[1,-1],[1,1],[-1,1],[-1,-1]]
+        r = range(8)
+        for chess in self.m_player1.m_chesses:
+            if chess in self.m_player1.m_kings:
+                for d in dir_king_player:
+                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and aft.m_x in r and aft.m_y in r and mid in self.m_player2.m_chesses :
+                        return True
+            else:
+                for d in dir_player:
+                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+
+                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and aft.m_x in r and aft.m_y in r and mid in self.m_player2.m_chesses :
+                        return True
+        return False
+
+    def test_capture_ai(self):
+        dir_ai = [[-1,-1],[-1,1]]
+        dir_king_ai = [[1,-1],[1,1],[-1,1],[-1,-1]] 
+        for chess in self.m_player2.m_chesses:
+            if chess in self.m_player2.m_kings:
+                for d in dir_king_ai:
+                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player2.m_chesses :
+                        return chess,aft
+            else:
+                for d in dir_ai:
+                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player1.m_chesses :
+                        return chess, aft
+        return Chess(-1,-1), Chess(-1,-1)
     """print chessboard"""
     def __str__(self):
         self.applyPlayer()
@@ -240,13 +295,19 @@ class ChessBoard :
         captureScore = -int(bestScore * 0.1)
         winScore = -int(bestScore * 0.3)
         maxChessPrev = Chess()
-        maxChessAft = Chess() 
-        directions = [[-1,-1], [-1,0],[-1,1],[0,1],[0,-1],[1,-1],[1,0],[1,1]]
+        maxChessAft = Chess()
+        directions = [[-1,-1], [-1,1]]
+        capturePrev, captureAft =  self.test_capture_ai()
+        if capturePrev.m_x != -1 :
+            return 0, capturePrev, captureAft
         # iterate all chess
         for chess in myChess:
             # iterate all directions
             for d in directions:
                 nx_status = self.move(chess, d, myChess, oppoChess)
+                # if self.test_capture_ai():
+                #     if nx_status != self.Status.CAPTURE:
+                #         continue
                 # move chess
                 nx_score = 0
                 nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
@@ -264,8 +325,13 @@ class ChessBoard :
                 #     nx_chess = Chess(chess.m_x + d[0]*2, chess.m_y + d[1]*2)
                 myChess.remove(chess)
                 myChess.append(nx_chess)
+                if nx_chess.m_x == 0:
+                    self.m_player2.m_kings.append(nx_chess)
                 if remove_oppo:
-                    oppoChess.remove(Chess(chess.m_x + d[0], chess.m_y + d[1]))
+                    chessRm = Chess(chess.m_x + d[0], chess.m_y + d[1])
+                    oppoChess.remove(chessRm)
+                    if chessRm in self.m_player1.m_kings:
+                        self.m_player1.m_kings.remove(chessRm)
                     
                 if self.win():
                     # reverse move
@@ -318,12 +384,14 @@ class ChessBoard :
         return status
 
     """move chess"""
-    def moveChess(self, player, oppoChess, chessPrev, chessAft):
+    def moveChess(self, player, oppoChess, oppoKings,chessPrev, chessAft):
         if abs(chessAft.m_x - chessPrev.m_x) >= 2 or abs(chessAft.m_y - chessPrev.m_y) >= 2:
             # if oppo chess should be removed
             chess = Chess((chessPrev.m_x+chessAft.m_x)/2, (chessPrev.m_y+chessAft.m_y)/2)
             if chess in oppoChess:
                 oppoChess.remove(chess)
+            if chess in oppoKings:
+                oppoKings.remove(chess)
         player.moveChess(chessPrev, chessAft)
 
     """return true if is at valid position"""
