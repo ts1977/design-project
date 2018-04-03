@@ -239,19 +239,20 @@ class ChessBoard :
 
     def test_capture_ai(self):
         dir_ai = [[-1,-1],[-1,1]]
-        dir_king_ai = [[1,-1],[1,1],[-1,1],[-1,-1]] 
+        dir_king_ai = [[1,-1],[1,1],[-1,1],[-1,-1]]
+        chessRange = range(8)
         for chess in self.m_player2.m_chesses:
             if chess in self.m_player2.m_kings:
                 for d in dir_king_ai:
                     mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
                     aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
-                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player2.m_chesses :
+                    if aft.m_x in chessRange and aft.m_y in chessRange and aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player2.m_chesses :
                         return chess,aft
             else:
                 for d in dir_ai:
                     mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
                     aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
-                    if aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player1.m_chesses :
+                    if aft.m_x in chessRange and aft.m_y in chessRange and aft not in self.m_player1.m_chesses and aft not in self.m_player2.m_chesses and mid in self.m_player1.m_chesses :
                         return chess, aft
         return Chess(-1,-1), Chess(-1,-1)
     """print chessboard"""
@@ -299,6 +300,8 @@ class ChessBoard :
         directions = [[-1,-1], [-1,1]]
         capturePrev, captureAft =  self.test_capture_ai()
         if capturePrev.m_x != -1 :
+            if captureAft.m_x  == 0 and capturePrev in self.m_player2.m_chesses:
+                self.m_player2.m_kings.append(captureAft)
             return 0, capturePrev, captureAft
         # iterate all chess
         for chess in myChess:
@@ -314,18 +317,18 @@ class ChessBoard :
                 remove_oppo = False
                 if (nx_status == self.Status.INVALID):
                     continue
-                elif (nx_status == self.Status.CAPTURE):
-                    remove_oppo = True
-                    nx_chess = Chess(chess.m_x + d[0]*2, chess.m_y + d[1]*2)
-                    # enemy chess must be captured whenever possible
-                    # reverse move
-                    nx_score = captureScore
-                    return nx_score, chess, nx_chess 
+                # elif (nx_status == self.Status.CAPTURE):
+                #     remove_oppo = True
+                #     nx_chess = Chess(chess.m_x + d[0]*2, chess.m_y + d[1]*2)
+                #     # enemy chess must be captured whenever possible
+                #     # reverse move
+                #     nx_score = captureScore
+                #     return nx_score, chess, nx_chess 
                 # elif (nx_status == self.Status.CANTER):
                 #     nx_chess = Chess(chess.m_x + d[0]*2, chess.m_y + d[1]*2)
                 myChess.remove(chess)
                 myChess.append(nx_chess)
-                if nx_chess.m_x == 0:
+                if nx_chess.m_x  == 0 and chess in self.m_player2.m_chesses:
                     self.m_player2.m_kings.append(nx_chess)
                 if remove_oppo:
                     chessRm = Chess(chess.m_x + d[0], chess.m_y + d[1])
@@ -396,13 +399,11 @@ class ChessBoard :
 
     """return true if is at valid position"""
     def isValid(self,  aft_x, aft_y):
-        if (aft_x< 0 or aft_x >= self.m_rows) or (aft_y < 0 or aft_y >= self.m_cols):
+        if (aft_x < 0 or aft_x >= self.m_rows) or (aft_y < 0 or aft_y >= self.m_cols):
             return False
         chess = Chess(aft_x, aft_y)
-        # if(aft_x <= pre_x) : 
-        #     return False
         if (chess in self.m_player1.m_chesses or chess in self.m_player2.m_chesses):
             return False
 
-        return self.m_initBoard[aft_x][aft_y] in ['*'] 
+        return self.m_initBoard[aft_x][aft_y] in ['*']
 

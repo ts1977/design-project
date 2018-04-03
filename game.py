@@ -1,5 +1,4 @@
 from checkers import *
-from tkinter import *
 class Game:
     def __init__(self):
         self.m_chessBoard = ChessBoard()
@@ -25,6 +24,8 @@ class Game:
         print "moving " + str(chess) + ", to" + str(chessAft)
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_playerChess, self.playerKings, chess, chessAft)
 
+# def playGame():
+    
 if __name__ == '__main__':
     g = Game()
     g.setMaxSteps(3)
@@ -69,7 +70,7 @@ if __name__ == '__main__':
                 g.m_chessBoard.removeError(win)
             status = board.move(preChess, [delta_x, delta_y], playerChess, oppoChess)
             # status = board.move(preChess, aftChess, playerChess, oppoChess)
-
+            
             if g.m_chessBoard.test_capture_player() == True:
                 if status != g.m_chessBoard.Status.CAPTURE:
                     status = board.move(preChess, [delta_x, delta_y], playerChess, oppoChess)
@@ -86,3 +87,4 @@ if __name__ == '__main__':
         else:
             g.moveAIChess()
         steps += 1
+    
