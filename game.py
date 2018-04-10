@@ -21,7 +21,7 @@ class Game:
     def moveAIChess(self):
         print ("AI moving")
         [_, chess, chessAft] = self.m_chessBoard.oneStep(self.m_aiChess, self.m_playerChess, 1)
-        print "moving " + str(chess) + ", to" + str(chessAft)
+        print("moving " + str(chess) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_playerChess, self.playerKings, chess, chessAft)
 
 # def playGame():
@@ -87,4 +87,3 @@ if __name__ == '__main__':
         else:
             g.moveAIChess()
         steps += 1
-    
