@@ -38,11 +38,6 @@ To achieve more advantageous situation, if there is no obligatory capture move, 
 3. increase the number of own pieces on the left or right edge because those pieces can't be captured
 4. prevent own pieces to be captured by opponent
 
-
-
-
-
-
 Plan of project:
 First two weeks: learn some related machine learning and artificial intelligence knowledge
 Second two weeks: make the GUI part of the checkers
@@ -57,7 +52,7 @@ The Learning Algorithm we will develop will use a mixture of supervised and unsu
 
 Our goal will be to develop a linear regression model that will be able to convert the state of the board into a single numeric score. This way, given a list of possible legal moves, the algorithm will simply choose the board with the highest score as being the best choice.
 
-We will evaluate each board by extracting a features from that board. For example, the number of pieces of each player, the number of kings, and the number of pieces that each player has threatened. This gives a feature vector, x. To evaluate the board, we calculate the dot product, w*x.
+We will evaluate each board by extracting a features from that board. For example, the number of pieces of each player, the number of kings, and the number of pieces that each player has threatened. This gives a feature vector, x. To evaluate the board, we calculate the dot product, &omega; * x
 
 To obtain a vector of weights we will use the gradient descent algorithm, on
 
@@ -67,4 +62,4 @@ We can thus accumulate a training set of data, which contains pairs of moves mad
 
 We can then use the standard gradient descent algorithm to train the weights on the data. There a few variation s that we will try. Either we will store all the data, and on each turn update the weights by doing a single step of gradient descent. Alternatively, we can use online learning, in which we use each board transition as it occurs to make an update, and then discard the training example. If we use online learning, we would probably need to do an update against the baseline truth examples (at some set interval) to make sure that the weights do not stray too far (the fear is that we rely too much on our estimation of the opponent as always making the best choice). (Alternatively, we could use a data aging process, were older data is slowly devalued, and then eventually discarded).
 
-To make an update to the weights we do: w <- w + (learning_rate)* (h(x_(n+1)) - h(x_n)).
+To make an update to the weights we do: &omega; <- &omega; + &alpha; * (h(x<sub>n+1</sub>) - h(x<sub>n</sub>))
