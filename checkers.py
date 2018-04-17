@@ -138,13 +138,40 @@ class ChessBoard :
             square = Rectangle(Point(chess.m_y*self.m_chessW+0.1*self.m_chessW, chess.m_x*self.m_chessH+0.1*self.m_chessH), Point(chess.m_y*self.m_chessW+0.1*self.m_chessW+2*self.m_chessR, chess.m_x*self.m_chessH+0.1*self.m_chessH+2*self.m_chessR))
             square.setFill("blue")
             square.draw(win)
+
+    # def displayChess2(self, win):
+    #     for chess in self.m_player1.chesses:
+    #         circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
+    #         circle.setFill("blue")
+    #         circle.draw(win)
+    #     for chess in self.m_player2.chesses:
+    #         circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
+    #         circle.setFill("red")
+    #         circle.draw(win)
+    #     for chess in self.m_player1.m_kings:
+    #         square = Rectangle(Point(chess.m_y*self.m_chessW+0.1*self.m_chessW, chess.m_x*self.m_chessH+0.1*self.m_chessH), Point(chess.m_y*self.m_chessW+0.1*self.m_chessW+2*self.m_chessR, chess.m_x*self.m_chessH+0.1*self.m_chessH+2*self.m_chessR))
+    #         square.setFill("blue")
+    #         square.draw(win)
+    #     for chess in self.m_player2.m_kings:
+    #         square = Rectangle(Point(chess.m_y*self.m_chessW+0.1*self.m_chessW, chess.m_x*self.m_chessH+0.1*self.m_chessH), Point(chess.m_y*self.m_chessW+0.1*self.m_chessW+2*self.m_chessR, chess.m_x*self.m_chessH+0.1*self.m_chessH+2*self.m_chessR))
+    #         square.setFill("red")
+    #         square.draw(win)    
     def displayButton(self,win):
         rectangle = Rectangle(Point(100,800), Point(300,900))
         rectangle2 = Rectangle(Point(400, 800), Point(600,900))
+        mode1 = Rectangle(Point(750,600), Point(950,675))        
+        mode2 = Rectangle(Point(750,700), Point(950,775))       
+        mode3 = Rectangle(Point(750,800), Point(950,875))       
         rectangle.setFill("Green")
         rectangle2.setFill("Red")
+        mode1.setFill("black")
+        mode2.setFill("black")
+        mode3.setFill("black")
         rectangle.draw(win)
         rectangle2.draw(win)
+        mode1.draw(win)
+        mode2.draw(win)
+        mode3.draw(win)
 
     def displayText(self, win):
         message = Text(Point(200,850), 'Begin')
@@ -159,11 +186,24 @@ class ChessBoard :
         message2.setSize(25)
         message2.draw(win)
         
-        message3 = Text(Point(800,850), 'Record')
-        message2.setTextColor('black')
-        message2.setStyle('italic')
-        message2.setSize(25)
-        message2.draw(win)    
+        message3 = Text(Point(850,630), 'Player vs Computer')
+        message3.setTextColor('white')
+        message3.setStyle('italic')
+        message3.setSize(15)
+        message3.draw(win)
+
+        message = Text(Point(850,730), 'Computer vs Player')
+        message.setTextColor('white')
+        message.setStyle('italic')
+        message.setSize(15)
+        message.draw(win)
+
+        message = Text(Point(850,830), 'Computer vs Computer')
+        message.setTextColor('white')
+        message.setStyle('italic')
+        message.setSize(15)
+        message.draw(win)
+
 
     def displayError(self, win):
         message = Text(Point(800, 100), 'Invalid move')
@@ -213,8 +253,6 @@ class ChessBoard :
     """return direction of two chess"""
     def chessDirection(self, preChess, aftChess):
         delta_x = aftChess.m_x - preChess.m_x
-        # if(delta_x > 0) : delta_x = 1
-        # else : delta_x = 0
         if preChess in self.m_player1.m_kings:
             if delta_x > 0:
                 delta_x = 1
@@ -222,6 +260,21 @@ class ChessBoard :
         else:
             if delta_x > 0:
                 delta_x = 1
+            else: delta_x = 0
+        delta_y = aftChess.m_y - preChess.m_y
+        if not delta_y == 0:
+            delta_y = 1 if delta_y > 0 else -1
+        return delta_x,delta_y
+
+    def chessDirection2(self, preChess, aftChess):
+        delta_x = aftChess.m_x - preChess.m_x
+        if preChess in self.m_player1.m_kings:
+            if delta_x < 0:
+                delta_x = -1
+            else: delta_x = 1
+        else:
+            if delta_x < 0:
+                delta_x = -1
             else: delta_x = 0
         delta_y = aftChess.m_y - preChess.m_y
         if not delta_y == 0:
@@ -250,15 +303,15 @@ class ChessBoard :
                     mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
                     aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
                     if aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in self.m_player2.chesses :
-                        return True
+                        return chess, aft
             else:
                 for d in dir_player:
                     mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
                     aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
 
                     if aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in self.m_player2.chesses :
-                        return True
-        return False
+                        return chess, aft
+        return Chess(-1,-1), Chess(-1,-1)
 
     def test_capture_player2(self):
         dir_ai = [[-1,-1],[-1,1]]
@@ -288,12 +341,16 @@ class ChessBoard :
             str += "\n"
         return str
 
+    # def selectMode(self, pos):
+        # if pos.x
+
+
     """return true when there is a winner"""
     def win(self):
         self.applyPlayer()
         return self.m_player1.size() == 0 or self.m_player2.size() == 0
 
-    """return score at leaf node, calc with manhattan distance"""
+    
 
     def reset(self):
         self.m_player1.chesses = [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]]
@@ -424,7 +481,73 @@ class ChessBoard :
                 if alpha >= beta:
                     return bestScore, maxChessPrev, maxChessAft
         return bestScore, maxChessPrev, maxChessAft
-            
+    
+    def oneStep2(self, myChess, oppoChess, curStep, alpha = -100000, beta = 100000):
+        bestScore = -10000 if curStep%2 == 1 else 10000
+        captureScore = -int(bestScore * 0.1)
+        winScore = -int(bestScore * 0.3)
+        maxChessPrev = Chess()
+        maxChessAft = Chess()
+
+        remove_oppo = False
+        remove_king = False
+        remove_edge = False
+
+        dir_chess = [[1,-1], [1,1]]
+        dir_king = [[1,1],[1,-1],[-1,1],[-1,-1]]
+        capturePrev, captureAft =  self.test_capture_player1()
+        if capturePrev.m_x != -1 :
+            return 0, capturePrev, captureAft
+        # iterate all chess
+        for chess in myChess:
+            # iterate all directions
+            if chess in self.m_player1.m_kings:
+                directions = dir_king
+            else: directions = dir_chess
+            for d in directions:
+                nx_status = self.move(chess, d, myChess, oppoChess)
+                nx_score = 0
+                nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
+                
+                if (nx_status == self.Status.INVALID):
+                    continue
+                myChess.remove(chess)
+                myChess.append(nx_chess)
+                # if nx_chess.m_x  == 0 and chess in self.m_player2.chesses:
+                #     self.m_player2.m_kings.append(nx_chess)
+                if self.win():
+                    # reverse move
+                    self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
+                    return winScore, nx_chess, chess
+
+                # add score if this move make chess closer to enemy castle
+                if curStep == self.MAX_STEPS:
+                    nx_score += self.getScore()
+
+                # get score
+                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1, alpha, beta) if curStep <= self.MAX_STEPS else [nx_score,0,0]
+                nx_score += tmp_nx
+                # reverse move
+                self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
+
+                # alphat-beta early return
+                if curStep%2 == 1:
+                    # AI move (maximizer)
+                    if nx_score > bestScore:
+                        bestScore = nx_score
+                        maxChessPrev = chess
+                        maxChessAft = nx_chess
+                    alpha = max(alpha, bestScore)
+                else:
+                    # player move (minimizer)
+                    if nx_score < bestScore:
+                        bestScore = nx_score
+                        maxChessPrev = chess
+                        maxChessAft = nx_chess
+                    beta = min(beta, bestScore)
+                if alpha >= beta:
+                    return bestScore, maxChessPrev, maxChessAft
+        return bestScore, maxChessPrev, maxChessAft
     """return status of current move"""
     def move(self, chess, nxD, myChess, oppoChess):
         # as long as two steps 
@@ -451,7 +574,15 @@ class ChessBoard :
             if chess in oppoKings:
                 oppoKings.remove(chess)
         player.moveChess(chessPrev, chessAft)
-
+    def moveChess2(self, player, oppoChess, oppoKings, chessPrev, chessAft):
+        if abs(chessAft.m_x - chessPrev.m_x) >= 2 or abs(chessAft.m_y - chessPrev.m_y) >= 2:
+            # if oppo chess should be removed
+            chess = Chess((chessPrev.m_x+chessAft.m_x)/2, (chessPrev.m_y+chessAft.m_y)/2)
+            if chess in oppoChess:
+                oppoChess.remove(chess)
+            if chess in oppoKings:
+                oppoKings.remove(chess)
+        player.moveChess(chessPrev, chessAft)
     """return true if is at valid position"""
     def isValid(self,  aft_x, aft_y):
         if (aft_x < 0 or aft_x >= self.m_rows) or (aft_y < 0 or aft_y >= self.m_cols):
