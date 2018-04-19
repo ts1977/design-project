@@ -32,7 +32,7 @@ class Model:
     def update(self, xnew, xold):
         vnew = self.eval(xnew)
         vold = self.eval(xold)
-        self.w += self.mu * (vnew - vold) + self.lambd * self.w.sum()
+        self.w += self.mu * (vnew - vold) * xold + self.lambd * self.w.sum()
 
 
     def calibrate(self):
