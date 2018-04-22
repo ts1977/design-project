@@ -23,6 +23,7 @@ class Game:
         self.m_chessBoard.setMaxSteps(s)
     def moveAIChess1(self,steps):
         print ("AI moving")
+<<<<<<< HEAD
         [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.m_player2Chess, self.m_player1Chess, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
@@ -31,6 +32,12 @@ class Game:
         [_, chessPrev, chessAft] = self.m_chessBoard.oneStep2(self.m_player1Chess, self.m_player2Chess, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
+=======
+        [_, chess, chessAft] = self.m_chessBoard.oneStep(self.m_aiChess, self.m_playerChess, 1)
+        print("moving " + str(chess) + ", to" + str(chessAft))
+        self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_playerChess, self.playerKings, chess, chessAft)
+
+>>>>>>> 67e6d8bac2c7f35668450c372c3f89eae30338c1
 # def playGame():
 
 if __name__ == '__main__':
@@ -126,6 +133,7 @@ if __name__ == '__main__':
                     g.m_chessBoard.displayError(win)
                     continue
                 else:
+<<<<<<< HEAD
                     g.m_chessBoard.removeError(win)
                 status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
                 # status = board.move(preChess, aftChess, playerChess, oppoChess)
@@ -172,3 +180,9 @@ if __name__ == '__main__':
         g.m_chessBoard.winText1(win)
     win.getMouse()
     win.close()
+=======
+                    print ("Invalid move")
+        else:
+            g.moveAIChess()
+        steps += 1
+>>>>>>> 67e6d8bac2c7f35668450c372c3f89eae30338c1
