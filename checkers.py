@@ -403,10 +403,58 @@ class ChessBoard :
                     num_neigh1 += 1
             if self.test_capture_player1():
                 num_capture1 = 1
-            
+
         score_player = num_chess1*p_piece + num_king1*p_king + num_edge1*p_edge + num_neigh1*p_neighbor + num_capture1*p_capture
 
         return score_ai - score_player
+
+    # extract features from myChess wrt oppoChess
+    def extract_my_features(self, myChess, oppoChess):
+        x = []
+
+        x.append(len(myChess))
+        x.append(len(oppoChess))
+
+        x.append(len(myChess.m_kings))
+        x.append(len(oppoChess.m_kings))
+
+        n_threatened = 0
+        # For now, just consider a piece threatened
+        # if the oppoenent has an adjacent piece that can
+        # do a jump
+        for chess in oppoChess:
+            if chess in oppoChess.m_kings:
+                dirs = [[1,1],[1,-1],[-1,1],[-1,-1]]
+            else:
+                dirs = [[-1,-1], [-1,1]]
+            for d in dirs:
+                dx = d[0]
+                dy = d[1]
+                move = Chess(chess.m_x + dx, chess.m_y + dy)
+                if move in myChess:
+                    n_threatened += 1
+
+        x.append(n_threatened)
+
+        n_threatened = 0
+        # For now, just consider a piece threatened
+        # if the oppoenent has an adjacent piece that can
+        # do a jump
+        for chess in myChess:
+            if chess in myChess.m_kings:
+                dirs = [[1,1],[1,-1],[-1,1],[-1,-1]]
+            else:
+                dirs = [[-1,-1], [-1,1]]
+            for d in dirs:
+                dx = d[0]
+                dy = d[1]
+                move = Chess(chess.m_x + dx, chess.m_y + dy)
+                if move in oppoChess:
+                    n_threatened += 1
+
+        x.append(n_threatened)
+
+        return x
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
         # remove the previous move and restore to previous condition
@@ -550,12 +598,12 @@ class ChessBoard :
         return bestScore, maxChessPrev, maxChessAft
     """return status of current move"""
     def move(self, chess, nxD, myChess, oppoChess):
-        # as long as two steps 
+        # as long as two steps
         status = self.Status.PLAIN
         nx_x = chess.m_x + nxD[0]
         nx_y = chess.m_y + nxD[1]
         nx_chess = Chess(nx_x, nx_y)
-        
+
         if (nx_chess in oppoChess):
             nx_x += nxD[0]
             nx_y += nxD[1]
