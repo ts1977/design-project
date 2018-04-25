@@ -317,34 +317,60 @@ class ChessBoard :
         self.m_player2.chesses = [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]]
 
     # obtain the parameter of the chesses on the board
-    def getBoardData(self):       
-        
-        data = [0] * 10
-        data[0] = len(self.m_player1.chesses)
-        data[1] = len(self.m_player2.chesses)
-        data[2] = len(self.m_player1.m_kings)
-        data[3] = len(self.m_player2.m_kings)
+    def getBoardData(self):
+        data = []
+
+        n_edge = 0
+        n_guard = 0
+        avg_dis = 0
+        n_pawns = 0
         for chess in self.m_player1.chesses:
             if chess.m_y == 0 or chess.m_y == 7:
-                data[6] += 1
+                n_edge += 1
             if chess.m_x == 0:
-                data[8] += 1
-        for chess in self.m_player2.chesses:
-            if chess.m_y == 0 or chess.m_y == 7:
-                data[7] += 1
-            if chess.m_x == 7:
-                data[9] += 1
+                n_guard += 1
+            if chess not self.m_player1.m_kings:
+                avg_dis += abs(7 - chess.m_x)
+                n_pawns += 1
+
+        data.append(len(self.m_player1.chesses))
+        data.append(len(self.m_player1.m_kings))
+        data.append(n_edge)
+        data.append(n_guard)
+        data.append(avg_dis/n_pawns)
 
         capturepPrev, captureAft = test_capture_player2()
         if capturePrev.m_x != -1:
-            data[4] = 1
+            data.append(1)
+
+        n_edge = 0
+        n_guard = 0
+        avg_dis = 0
+        n_pawns = 0
+        for chess in self.m_player2.chesses:
+            if chess.m_y == 0 or chess.m_y == 7:
+                n_edge += 1
+            if chess.m_x == 7:
+                n_guard+= 1
+            if chess not in self.m_player2.m_kings:
+                avg_dis += chess.m_x
+                n_pawns += 1
+
+        data.append(n_edge)
+        data.append(n_guard)
+        data.append(avg_dis/n_pawns)
+        data.append(len(self.m_player2.chesses))
+        data.append(len(self.m_player2.m_kings))
+
+        # TODO: write function to count jumps
+
         capturePrev2, captureAft2 = test_capture_player1()
         if capturePrev2.m_x != -1:
-            data[5] = 1
+            data.append(1)
 
         return data
 
-    def getScore(self): 
+    def getScore(self):
 
         score_player = 0.0
         score_ai = 0.0
