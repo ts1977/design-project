@@ -7,6 +7,7 @@ class Game:
         self.m_player2Chess = self.m_chessBoard.m_player2.chesses
         self.player1Kings = self.m_chessBoard.m_player1.m_kings
         self.player2Kings = self.m_chessBoard.m_player2.m_kings
+        self.model = self.m_chessBoard.model
     def end(self):
         return self.m_chessBoard.win()
     def printChessTable(self):
@@ -31,7 +32,6 @@ class Game:
         [_, chessPrev, chessAft] = self.m_chessBoard.oneStep2(self.m_player1Chess, self.m_player2Chess, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
-# def playGame():
 
 if __name__ == '__main__':
     g = Game()
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     player2Chess = board.m_player2.chesses
     steps = 0
     win = GraphWin('Checkers', 1000, 1000)
-    
+
     g.m_chessBoard.displayButton(win)
     g.m_chessBoard.displayText(win)
 
@@ -62,14 +62,13 @@ if __name__ == '__main__':
             if  steps % 2 == 0:
                 g.printChessTable()
                 g.printPlayerChess()
-                g.printAIChess()           
+                g.printAIChess()
                 [i, j] = g.m_chessBoard.position2Index(win.getMouse())
                 position = Point(i* board.m_chessH, j* board.m_chessW)
-                
                 preChess = Chess(int(j), int(i))
                 if not preChess in player1Chess:
                     continue
-                g.m_chessBoard.highlightChess(win, preChess) 
+                g.m_chessBoard.highlightChess(win, preChess)
                 [i, j] = g.m_chessBoard.position2Index(win.getMouse())
                 aftChess = Chess(int(j), int(i))
                 [delta_x, delta_y] = g.m_chessBoard.chessDirection(preChess, aftChess)
@@ -91,12 +90,13 @@ if __name__ == '__main__':
                         g.m_chessBoard.removeError(win)
                 else:
                     if status == g.m_chessBoard.Status.PLAIN:
-                        g.movePlayer1Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))               
+                        g.movePlayer1Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))
                     else:
                         print ("Invalid move")
             else:
                 g.moveAIChess1(steps)
             steps += 1
+            g.model.logmove(g.m_chessBoard.getBoard())
 
 
     elif select.y >= 700 and select.y <= 775:
@@ -111,14 +111,14 @@ if __name__ == '__main__':
             if  steps % 2 == 1:
                 g.printChessTable()
                 g.printPlayerChess()
-                g.printAIChess()           
+                g.printAIChess()
                 [i, j] = g.m_chessBoard.position2Index(win.getMouse())
                 position = Point(i* board.m_chessH, j* board.m_chessW)
-                
+
                 preChess = Chess(int(j), int(i))
                 if not preChess in player2Chess:
                     continue
-                g.m_chessBoard.highlightChess(win, preChess) 
+                g.m_chessBoard.highlightChess(win, preChess)
                 [i, j] = g.m_chessBoard.position2Index(win.getMouse())
                 aftChess = Chess(int(j), int(i))
                 [delta_x, delta_y] = g.m_chessBoard.chessDirection2(preChess, aftChess)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
                     g.m_chessBoard.removeError(win)
                 status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
                 # status = board.move(preChess, aftChess, playerChess, oppoChess)
-                
+
                 capturePrev, captureAft = g.m_chessBoard.test_capture_player2()
                 if capturePrev.m_x != -1:
                     if  status != g.m_chessBoard.Status.CAPTURE:
@@ -141,7 +141,7 @@ if __name__ == '__main__':
                         g.m_chessBoard.removeError(win)
                 else:
                     if status == g.m_chessBoard.Status.PLAIN:
-                        g.movePlayer2Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))               
+                        g.movePlayer2Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))
                     else:
                         print ("Invalid move")
             else:
