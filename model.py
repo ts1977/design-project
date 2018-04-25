@@ -27,8 +27,8 @@ class LearningModel:
 
         self.base_x = np.array([
                 self.board_init,
-                [12,  0, 12, 0, 0, 12],
-                [0,  12, 0, 12, 12, 0],
+                [12, 12, 12, 12, 0, 12, 0, 0, 0, 0, 7, 0],
+                [0, 0, 0, 0, 7, 0, 12, 12, 12, 12, 0, 12],
         ])
 
         '''
@@ -48,8 +48,8 @@ class LearningModel:
         self.lambd = 0.001
         self.moves = np.array(self.board_init)
 
-        #for i in range(int(1e3*self.lambd)):
-        #    self.calibrate()
+        for i in range(int(1e3*self.lambd)):
+            self.calibrate()
 
     # method used to evaluate a board as
     # categorized by feature vector x

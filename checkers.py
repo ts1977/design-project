@@ -376,6 +376,7 @@ class ChessBoard :
 
         return data
 
+    '''
     def getScore(self):
 
         score_player = 0.0
@@ -413,7 +414,7 @@ class ChessBoard :
         # data = getBoardData()
 
         # score = model.eval(data)
-            
+
         score_ai = num_chess2*a_piece + num_king2*a_king + num_edge2*a_edge + num_neigh2*a_neighbor + num_capture2*a_capture
 
         for chess in self.m_player1.chesses:
@@ -431,6 +432,10 @@ class ChessBoard :
         score_player = num_chess1*p_piece + num_king1*p_king + num_edge1*p_edge + num_neigh1*p_neighbor + num_capture1*p_capture
 
         return score_ai - score_player
+        '''
+
+    def getScore(self):
+        return self.model.eval(self.getBoard())
 
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
@@ -439,6 +444,7 @@ class ChessBoard :
         myChess.append(chessPrev)
         if remove_oppo:
             oppoChess.append(Chess(chessPrev.m_x + d[0], chessPrev.m_y + d[1]))
+
 
     def oneStep(self, myChess, oppoChess, curStep):
         bestScore = -10000 if curStep%2 == 1 else 10000
@@ -484,7 +490,7 @@ class ChessBoard :
                 nx_status = self.move(chess, d, myChess, oppoChess)
                 nx_score = 0
                 nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
-                
+
                 if (nx_status == self.Status.INVALID):
                     continue
                 myChess.remove(chess)
@@ -505,8 +511,7 @@ class ChessBoard :
                 nx_score += tmp_nx
                 # reverse move
                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
-
-                
+ 
                 if curStep%2 == 1:
                     # AI move (maximizer)
                     if nx_score > bestScore:
@@ -519,9 +524,9 @@ class ChessBoard :
                         bestScore = nx_score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
-                    
+
         return bestScore, maxChessPrev, maxChessAft
-    
+
     def oneStep2(self, myChess, oppoChess, curStep):
         bestScore = -10000 if curStep%2 == 1 else 10000
         captureScore = -int(bestScore * 0.1)
@@ -548,7 +553,7 @@ class ChessBoard :
                 nx_status = self.move(chess, d, myChess, oppoChess)
                 nx_score = 0
                 nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
-                
+
                 if (nx_status == self.Status.INVALID):
                     continue
                 myChess.remove(chess)
