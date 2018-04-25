@@ -395,12 +395,11 @@ class ChessBoard :
                     num_neigh1 += 1
             if self.test_capture_player1():
                 num_capture1 = 1
-            
+
         score_player = num_chess1*p_piece + num_king1*p_king + num_edge1*p_edge + num_neigh1*p_neighbor + num_capture1*p_capture
 
         return score_ai - score_player
 
-        #return score
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
         # remove the previous move and restore to previous condition
@@ -556,12 +555,12 @@ class ChessBoard :
 
     """return status of current move"""
     def move(self, chess, nxD, myChess, oppoChess):
-        # as long as two steps 
+        # as long as two steps
         status = self.Status.PLAIN
         nx_x = chess.m_x + nxD[0]
         nx_y = chess.m_y + nxD[1]
         nx_chess = Chess(nx_x, nx_y)
-        
+
         if (nx_chess in oppoChess):
             nx_x += nxD[0]
             nx_y += nxD[1]
