@@ -1,7 +1,8 @@
 
 import numpy as np
+import pickle
 
-class Model:
+class LearningModel:
     def __init__(self):
         '''
         The baseline examples.
@@ -20,8 +21,12 @@ class Model:
         winning,
         losing
         '''
+        self.board_init = np.array(
+                [12, 0, 3, 4, 6, 0, 12, 0, 3, 4, 6, 0]
+                )
+
         self.base_x = np.array([
-                [12, 12, 0, 0, 0, 0],
+                self.board_init,
                 [12,  0, 12, 0, 0, 12],
                 [0,  12, 0, 12, 12, 0],
         ])
@@ -37,13 +42,14 @@ class Model:
             [-1000],
         ])
 
-        self.m = 6  # number of features
+        self.m = 12  # number of features
         self.w = np.zeros((self.m,1))
         self.mu = 0.1
         self.lambd = 0.001
+        self.moves = np.array(self.board_init)
 
-        for i in range(int(1e3*self.lambd)):
-            self.calibrate()
+        #for i in range(int(1e3*self.lambd)):
+        #    self.calibrate()
 
     # method used to evaluate a board as
     # categorized by feature vector x
@@ -68,3 +74,37 @@ class Model:
         # regularize
         delta += self.lambd * self.w.sum()
         self.w += (self.mu/self.base_x.shape[0]) * delta
+
+    def logmove(self, x):
+        x = np.array(x)
+        self.moves = np.vstack(self.moves, x)
+
+    def analyze_result(self):
+
+        last_play = self.moves[-1]
+        if last_play[0] == 0:
+            won = False
+            score_last = -1000
+        elif last_play[6] == 0:
+            won = True
+            score_last = 1000
+        else:
+            raise Exception("Neither Player has Lost")
+
+        n_moves = self.moves.shape[0]
+        n_times = 2500
+
+        for _ in range(n_times):
+            self.w += self.mu * (score_last - self.eval(last_play)) * last_play
+            for i in range(n_moves-2, -1, -1):
+                curr = self.moves[i]
+                succ = self.moves[i+1]
+                self.w += self.mu * (self.eval(succ) - self.eval(curr)) * curr
+            self.w += self.mu * (0 - self.eval(self.moves[0])) * self.moves[0]
+            for i in range(0, n_moves-1, 1):
+                curr = self.moves[i]
+                succ = self.moves[i+1]
+                self.w += self.mu * (self.eval(succ) - self.eval(curr)) * curr
+
+        with open("w.pl", "rb") as f:
+            pickle.dump(self.w, f)

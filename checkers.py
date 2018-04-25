@@ -5,6 +5,7 @@ from copy import copy, deepcopy
 import unittest
 import sys
 import random
+from model import LearningModel
 
 import model
 
@@ -102,6 +103,7 @@ class ChessBoard :
                 ]
         self.m_player1 = Player("player", [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]])
         self.m_player2 = Player("computer", [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
+        self.m_model = LearningModel()
         self.m_curBoard = []
 
 
@@ -329,7 +331,7 @@ class ChessBoard :
                 n_edge += 1
             if chess.m_x == 0:
                 n_guard += 1
-            if chess not self.m_player1.m_kings:
+            if chess not in self.m_player1.m_kings:
                 avg_dis += abs(7 - chess.m_x)
                 n_pawns += 1
 
@@ -342,6 +344,8 @@ class ChessBoard :
         capturepPrev, captureAft = test_capture_player2()
         if capturePrev.m_x != -1:
             data.append(1)
+        else:
+            data.append(0)
 
         n_edge = 0
         n_guard = 0
@@ -367,6 +371,8 @@ class ChessBoard :
         capturePrev2, captureAft2 = test_capture_player1()
         if capturePrev2.m_x != -1:
             data.append(1)
+        else:
+            data.append(0)
 
         return data
 
