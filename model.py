@@ -1,5 +1,6 @@
 
 import numpy as np
+import time
 import pickle
 
 class LearningModel:
@@ -90,6 +91,8 @@ class LearningModel:
             score_last = 1000
         else:
             raise Exception("Neither Player has Lost")
+
+        print("init w:", self.w)
 
         n_moves = self.moves.shape[0]
         n_times = 2500

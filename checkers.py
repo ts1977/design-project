@@ -7,8 +7,6 @@ import sys
 import random
 from model import LearningModel
 
-import model
-
 p_piece = random.randint(0, 1)
 p_king = random.randint(1, 100)
 p_edge = random.randint(1, 30)
@@ -435,7 +433,7 @@ class ChessBoard :
         '''
 
     def getScore(self):
-        return self.model.eval(self.getBoard())
+        return self.model.eval(self.getBoardData())
 
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
