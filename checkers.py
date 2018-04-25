@@ -65,12 +65,17 @@ class Player :
             self.chesses.append(Chess(pos[0], pos[1]))
 
     def moveChess(self, chessPrev, chessAfter):
-        self.chesses.remove(chessPrev)
+        try:
+            self.chesses.remove(chessPrev)
+        except:
+            print("chessPrev", chessPrev)
+            print("chessAft", chessAfter)
+            raise ValueError("x not in list")
         self.chesses.append(chessAfter)
         if chessPrev in self.m_kings:
             self.m_kings.remove(chessPrev)
             self.m_kings.append(chessAfter)
-        if chessAfter.m_x == 7 or chessAfter.m_x == 0:
+        if chessPrev not in self.m_kings and chessAfter.m_x == 7 or chessAfter.m_x == 0:
             self.m_kings.append(chessAfter)
 
 class ChessBoard :
@@ -337,9 +342,12 @@ class ChessBoard :
         data.append(len(self.m_player1.m_kings))
         data.append(n_edge)
         data.append(n_guard)
-        data.append(avg_dis/n_pawns)
+        if n_pawns == 0:
+            data.append(0)
+        else:
+            data.append(avg_dis/n_pawns)
 
-        capturepPrev, captureAft = test_capture_player2()
+        capturePrev, captureAft = self.test_capture_player2()
         if capturePrev.m_x != -1:
             data.append(1)
         else:
@@ -358,15 +366,19 @@ class ChessBoard :
                 avg_dis += chess.m_x
                 n_pawns += 1
 
-        data.append(n_edge)
-        data.append(n_guard)
-        data.append(avg_dis/n_pawns)
         data.append(len(self.m_player2.chesses))
         data.append(len(self.m_player2.m_kings))
+        data.append(n_edge)
+        data.append(n_guard)
+
+        if n_pawns == 0:
+            data.append(0)
+        else:
+            data.append(avg_dis/n_pawns)
 
         # TODO: write function to count jumps
 
-        capturePrev2, captureAft2 = test_capture_player1()
+        capturePrev2, captureAft2 = self.test_capture_player1()
         if capturePrev2.m_x != -1:
             data.append(1)
         else:
@@ -433,7 +445,7 @@ class ChessBoard :
         '''
 
     def getScore(self):
-        return self.model.eval(self.getBoardData())
+        return self.m_model.eval(self.getBoardData())
 
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
@@ -493,6 +505,9 @@ class ChessBoard :
                     continue
                 myChess.remove(chess)
                 myChess.append(nx_chess)
+                if chess in self.m_player2.m_kings:
+                    self.m_player2.m_kings.remove(chess)
+                    self.m_player2.m_kings.append(nx_chess)
                 # if nx_chess.m_x  == 0 and chess in self.m_player2.chesses:
                 #     self.m_player2.m_kings.append(nx_chess)
                 if self.win():

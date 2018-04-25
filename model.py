@@ -78,7 +78,7 @@ class LearningModel:
 
     def logmove(self, x):
         x = np.array(x)
-        self.moves = np.vstack(self.moves, x)
+        self.moves = np.vstack((self.moves, x))
 
     def analyze_result(self):
 
