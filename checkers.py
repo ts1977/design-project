@@ -1,23 +1,24 @@
-
-
 from graphics import *
 
 from enum import Enum
 from copy import copy, deepcopy
 import unittest
 import sys
+import random
 
-p_piece = 1.0
-p_king = 100.0
-p_edge = 30.0
-p_neighbor= 1.0
-p_capture = 5.0
+import model
 
-a_piece = 1.0
-a_king = 100.0
-a_edge = 30.0
-a_neighbor= 1.0
-a_capture = 5.0
+p_piece = random.randint(0, 1)
+p_king = random.randint(1, 100)
+p_edge = random.randint(1, 30)
+p_neighbor = random.randint(1, 2)
+p_capture = random.randint(1, 50)
+
+a_piece = random.randint(0, 1)
+a_king = random.randint(1, 100)
+a_edge = random.randint(1, 30)
+a_neighbor = random.randint(1, 2)
+a_capture = random.randint(1, 50)
 
 class Chess:
     """initial for chess"""
@@ -139,52 +140,18 @@ class ChessBoard :
             square.setFill("blue")
             square.draw(win)
 
-    # def displayChess2(self, win):
-    #     for chess in self.m_player1.chesses:
-    #         circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
-    #         circle.setFill("blue")
-    #         circle.draw(win)
-    #     for chess in self.m_player2.chesses:
-    #         circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
-    #         circle.setFill("red")
-    #         circle.draw(win)
-    #     for chess in self.m_player1.m_kings:
-    #         square = Rectangle(Point(chess.m_y*self.m_chessW+0.1*self.m_chessW, chess.m_x*self.m_chessH+0.1*self.m_chessH), Point(chess.m_y*self.m_chessW+0.1*self.m_chessW+2*self.m_chessR, chess.m_x*self.m_chessH+0.1*self.m_chessH+2*self.m_chessR))
-    #         square.setFill("blue")
-    #         square.draw(win)
-    #     for chess in self.m_player2.m_kings:
-    #         square = Rectangle(Point(chess.m_y*self.m_chessW+0.1*self.m_chessW, chess.m_x*self.m_chessH+0.1*self.m_chessH), Point(chess.m_y*self.m_chessW+0.1*self.m_chessW+2*self.m_chessR, chess.m_x*self.m_chessH+0.1*self.m_chessH+2*self.m_chessR))
-    #         square.setFill("red")
-    #         square.draw(win)    
     def displayButton(self,win):
-        rectangle = Rectangle(Point(100,800), Point(300,900))
-        rectangle2 = Rectangle(Point(400, 800), Point(600,900))
         mode1 = Rectangle(Point(750,600), Point(950,675))        
         mode2 = Rectangle(Point(750,700), Point(950,775))       
         mode3 = Rectangle(Point(750,800), Point(950,875))       
-        rectangle.setFill("Green")
-        rectangle2.setFill("Red")
         mode1.setFill("black")
         mode2.setFill("black")
         mode3.setFill("black")
-        rectangle.draw(win)
-        rectangle2.draw(win)
         mode1.draw(win)
         mode2.draw(win)
         mode3.draw(win)
 
     def displayText(self, win):
-        message = Text(Point(200,850), 'Begin')
-        message.setTextColor('black')
-        message.setStyle('italic')
-        message.setSize(25)
-        message.draw(win)
-
-        message2 = Text(Point(500,850), 'Reset')
-        message2.setTextColor('black')
-        message2.setStyle('italic')
-        message2.setSize(25)
-        message2.draw(win)
         
         message3 = Text(Point(850,630), 'Player vs Computer')
         message3.setTextColor('white')
@@ -203,7 +170,6 @@ class ChessBoard :
         message.setStyle('italic')
         message.setSize(15)
         message.draw(win)
-
 
     def displayError(self, win):
         message = Text(Point(800, 100), 'Invalid move')
@@ -268,7 +234,7 @@ class ChessBoard :
 
     def chessDirection2(self, preChess, aftChess):
         delta_x = aftChess.m_x - preChess.m_x
-        if preChess in self.m_player1.m_kings:
+        if preChess in self.m_player2.m_kings:
             if delta_x < 0:
                 delta_x = -1
             else: delta_x = 1
@@ -341,22 +307,44 @@ class ChessBoard :
             str += "\n"
         return str
 
-    # def selectMode(self, pos):
-        # if pos.x
-
-
     """return true when there is a winner"""
     def win(self):
         self.applyPlayer()
         return self.m_player1.size() == 0 or self.m_player2.size() == 0
 
-    
-
     def reset(self):
         self.m_player1.chesses = [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]]
         self.m_player2.chesses = [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]]
 
-    def getScore(self):
+    # obtain the parameter of the chesses on the board
+    def getBoardData(self):       
+        
+        data = [0] * 10
+        data[0] = len(self.m_player1.chesses)
+        data[1] = len(self.m_player2.chesses)
+        data[2] = len(self.m_player1.m_kings)
+        data[3] = len(self.m_player2.m_kings)
+        for chess in self.m_player1.chesses:
+            if chess.m_y == 0 or chess.m_y == 7:
+                data[6] += 1
+            if chess.m_x == 0:
+                data[8] += 1
+        for chess in self.m_player2.chesses:
+            if chess.m_y == 0 or chess.m_y == 7:
+                data[7] += 1
+            if chess.m_x == 7:
+                data[9] += 1
+
+        capturepPrev, captureAft = test_capture_player2()
+        if capturePrev.m_x != -1:
+            data[4] = 1
+        capturePrev2, captureAft2 = test_capture_player1()
+        if capturePrev2.m_x != -1:
+            data[5] = 1
+
+        return data
+
+    def getScore(self): 
 
         score_player = 0.0
         score_ai = 0.0
@@ -389,6 +377,10 @@ class ChessBoard :
                     num_neigh2 += 1
             if self.test_capture_player2():
                 num_capture2 = 1
+
+        # data = getBoardData()
+
+        # score = model.eval(data)
             
         score_ai = num_chess2*a_piece + num_king2*a_king + num_edge2*a_edge + num_neigh2*a_neighbor + num_capture2*a_capture
 
@@ -408,6 +400,8 @@ class ChessBoard :
 
         return score_ai - score_player
 
+        #return score
+
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
         # remove the previous move and restore to previous condition
         myChess.remove(chessAft)
@@ -415,7 +409,7 @@ class ChessBoard :
         if remove_oppo:
             oppoChess.append(Chess(chessPrev.m_x + d[0], chessPrev.m_y + d[1]))
 
-    def oneStep(self, myChess, oppoChess, curStep, alpha = -100000, beta = 100000):
+    def oneStep(self, myChess, oppoChess, curStep):
         bestScore = -10000 if curStep%2 == 1 else 10000
         captureScore = -int(bestScore * 0.1)
         winScore = -int(bestScore * 0.3)
@@ -431,7 +425,25 @@ class ChessBoard :
         capturePrev, captureAft =  self.test_capture_player2()
         if capturePrev.m_x != -1 :
             return 0, capturePrev, captureAft
-        # iterate all chess
+        # capturePrev2, captureAft2 = self.test_capture_player1()
+        # if capturePrev2.m_x != -1 :
+        #     for chess in myChess:
+        #         if chess in self.m_player2.m_kings:
+        #             directions = dir_king
+        #         else: directions = dir_chess
+
+        #         for d in directions:
+        #             nx_chess = Chess(chess.m_x + d[0], chess.m_y+d[1])
+        #             nx_status = self.move(chess, d, myChess, oppoChess)
+        #             if nx_status == self.Status.INVALID:
+        #                 continue
+        #             myChess.remove(chess)
+        #             myChess.append(nx_chess)
+        #             capturePrev3, captureAft3 = self.test_capture_player1()
+        #             if capturePrev3.m_x == -1:
+        #                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
+        #                 return 0, chess, nx_chess
+        # # iterate all chess
         for chess in myChess:
             # iterate all directions
             if chess in self.m_player2.m_kings:
@@ -458,31 +470,28 @@ class ChessBoard :
                     nx_score += self.getScore()
 
                 # get score
-                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1, alpha, beta) if curStep <= self.MAX_STEPS else [nx_score,0,0]
+                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
                 nx_score += tmp_nx
                 # reverse move
                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
 
-                # alphat-beta early return
+                
                 if curStep%2 == 1:
                     # AI move (maximizer)
                     if nx_score > bestScore:
                         bestScore = nx_score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
-                    alpha = max(alpha, bestScore)
                 else:
                     # player move (minimizer)
                     if nx_score < bestScore:
                         bestScore = nx_score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
-                    beta = min(beta, bestScore)
-                if alpha >= beta:
-                    return bestScore, maxChessPrev, maxChessAft
+                    
         return bestScore, maxChessPrev, maxChessAft
     
-    def oneStep2(self, myChess, oppoChess, curStep, alpha = -100000, beta = 100000):
+    def oneStep2(self, myChess, oppoChess, curStep):
         bestScore = -10000 if curStep%2 == 1 else 10000
         captureScore = -int(bestScore * 0.1)
         winScore = -int(bestScore * 0.3)
@@ -525,29 +534,26 @@ class ChessBoard :
                     nx_score += self.getScore()
 
                 # get score
-                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1, alpha, beta) if curStep <= self.MAX_STEPS else [nx_score,0,0]
+                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
                 nx_score += tmp_nx
                 # reverse move
                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
 
-                # alphat-beta early return
                 if curStep%2 == 1:
                     # AI move (maximizer)
                     if nx_score > bestScore:
                         bestScore = nx_score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
-                    alpha = max(alpha, bestScore)
                 else:
                     # player move (minimizer)
                     if nx_score < bestScore:
                         bestScore = nx_score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
-                    beta = min(beta, bestScore)
-                if alpha >= beta:
-                    return bestScore, maxChessPrev, maxChessAft
+
         return bestScore, maxChessPrev, maxChessAft
+
     """return status of current move"""
     def move(self, chess, nxD, myChess, oppoChess):
         # as long as two steps 
@@ -574,6 +580,7 @@ class ChessBoard :
             if chess in oppoKings:
                 oppoKings.remove(chess)
         player.moveChess(chessPrev, chessAft)
+
     def moveChess2(self, player, oppoChess, oppoKings, chessPrev, chessAft):
         if abs(chessAft.m_x - chessPrev.m_x) >= 2 or abs(chessAft.m_y - chessPrev.m_y) >= 2:
             # if oppo chess should be removed
@@ -592,4 +599,3 @@ class ChessBoard :
             return False
 
         return self.m_initBoard[aft_x][aft_y] in ['*']
-
