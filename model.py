@@ -2,6 +2,7 @@
 import numpy as np
 import time
 import pickle
+import os
 
 class LearningModel:
     def __init__(self):
@@ -76,6 +77,13 @@ class LearningModel:
         delta += self.lambd * self.w.sum()
         self.w += (self.mu/self.base_x.shape[0]) * delta
 
+    def reload_model(self):
+        try:
+            with open("w.pl", "rb") as f:
+                self.w = pickle.load(f)
+        except:
+            print("cant reload model, using default")
+
     def logmove(self, x):
         x = np.array(x)
         self.moves = np.vstack((self.moves, x))
@@ -109,5 +117,5 @@ class LearningModel:
                 succ = self.moves[i+1]
                 self.w += self.mu * (self.eval(succ) - self.eval(curr)) * curr
 
-        with open("w.pl", "rb") as f:
+        with open("w.pl", "wb") as f:
             pickle.dump(self.w, f)

@@ -7,7 +7,7 @@ class Game:
         self.m_player2Chess = self.m_chessBoard.m_player2.chesses
         self.player1Kings = self.m_chessBoard.m_player1.m_kings
         self.player2Kings = self.m_chessBoard.m_player2.m_kings
-        self.model = self.m_chessBoard.m_model
+        self.model = self.m_chessBoard.m_player2.m_model
     def end(self):
         return self.m_chessBoard.win()
     def printChessTable(self):
