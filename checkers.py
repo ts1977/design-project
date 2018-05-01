@@ -45,7 +45,6 @@ class Player :
         self.being_attacked = False
         self.num_friend = 0
         self.m_name = name
-        self.m_model = LearningModel()
         for pos in startPositions:
             self.chesses.append(Chess(pos[0], pos[1]))
 
@@ -66,17 +65,18 @@ class Player :
             self.chesses.append(Chess(pos[0], pos[1]))
 
     def moveChess(self, chessPrev, chessAfter):
-        try:
-            self.chesses.remove(chessPrev)
-        except:
-            print("chessPrev", chessPrev)
-            print("chessAft", chessAfter)
-            raise ValueError("x not in list")
+        # try:
+        #     self.chesses.remove(chessPrev)
+        # except:
+        #     print("chessPrev", chessPrev)
+        #     print("chessAft", chessAfter)
+        #     raise ValueError("x not in list")
+        self.chesses.remove(chessPrev)
         self.chesses.append(chessAfter)
         if chessPrev in self.m_kings:
             self.m_kings.remove(chessPrev)
             self.m_kings.append(chessAfter)
-        if chessPrev not in self.m_kings and chessAfter.m_x == 7 or chessAfter.m_x == 0:
+        if chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
             self.m_kings.append(chessAfter)
 
 class ChessBoard :
@@ -107,6 +107,7 @@ class ChessBoard :
                 ]
         self.m_player1 = Player("player", [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]])
         self.m_player2 = Player("computer", [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
+        self.model = LearningModel()
         self.m_curBoard = []
 
 
@@ -386,66 +387,10 @@ class ChessBoard :
 
         return data
 
-    '''
+   
+
     def getScore(self):
-
-        score_player = 0.0
-        score_ai = 0.0
-
-        num_chess1 = 0
-        num_king1 = 0
-        num_edge1 = 0
-        num_neigh1 = 0
-        num_capture1 = 0
-
-        num_chess2 = 0
-        num_king2 = 0
-        num_edge2 = 0
-        num_neigh2 = 0
-        num_capture2 = 0
-
-        num_piece1 = len(self.m_player1.chesses)
-        num_piece2 = len(self.m_player2.chesses)
-
-        dirs = [[1,1],[1,-1],[-1,1],[-1,-1]]
-
-        for chess in self.m_player2.chesses:
-            if chess in self.m_player2.m_kings:
-                num_king2 += 1
-            if chess in self.m_player2.edges:
-                num_edge2 += 1
-            for d in dirs:
-                neighbor = Chess(chess.m_x + d[0], chess.m_y + d[1])
-                if neighbor in self.m_player2.chesses:
-                    num_neigh2 += 1
-            if self.test_capture_player2():
-                num_capture2 = 1
-
-        # data = getBoardData()
-
-        # score = model.eval(data)
-
-        score_ai = num_chess2*a_piece + num_king2*a_king + num_edge2*a_edge + num_neigh2*a_neighbor + num_capture2*a_capture
-
-        for chess in self.m_player1.chesses:
-            if chess in self.m_player1.m_kings:
-                num_king1 += 1
-            if chess in self.m_player1.edges:
-                num_edge1 += 1
-            for d in dirs:
-                neighbor = Chess(chess.m_x + d[0], chess.m_y + d[1])
-                if neighbor in self.m_player1.chesses:
-                    num_neigh1 += 1
-            if self.test_capture_player1():
-                num_capture1 = 1
-
-        score_player = num_chess1*p_piece + num_king1*p_king + num_edge1*p_edge + num_neigh1*p_neighbor + num_capture1*p_capture
-
-        return score_ai - score_player
-        '''
-
-    def getScore(self, player):
-        return player.m_model.eval(self.getBoardData())
+        return self.model.eval(self.getBoardData())
 
 
     def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
@@ -505,9 +450,9 @@ class ChessBoard :
                     continue
                 myChess.remove(chess)
                 myChess.append(nx_chess)
-                if chess in self.m_player2.m_kings:
-                    self.m_player2.m_kings.remove(chess)
-                    self.m_player2.m_kings.append(nx_chess)
+                # if chess in self.m_player2.m_kings:
+                #     self.m_player2.m_kings.remove(chess)
+                #     self.m_player2.m_kings.append(nx_chess)
                 # if nx_chess.m_x  == 0 and chess in self.m_player2.chesses:
                 #     self.m_player2.m_kings.append(nx_chess)
                 if self.win():
@@ -517,7 +462,7 @@ class ChessBoard :
 
                 # add score if this move make chess closer to enemy castle
                 if curStep == self.MAX_STEPS:
-                    nx_score += self.getScore(self.m_player2)
+                    nx_score += self.getScore()
 
                 # get score
                 [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
@@ -571,8 +516,10 @@ class ChessBoard :
                     continue
                 myChess.remove(chess)
                 myChess.append(nx_chess)
-                # if nx_chess.m_x  == 0 and chess in self.m_player2.chesses:
-                #     self.m_player2.m_kings.append(nx_chess)
+
+                # if chess in self.m_player1.m_kings:
+                #     self.m_player1.m_kings.remove(chess)
+                #     self.m_player1.m_kings.append(nx_chess)
                 if self.win():
                     # reverse move
                     self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
@@ -580,10 +527,10 @@ class ChessBoard :
 
                 # add score if this move make chess closer to enemy castle
                 if curStep == self.MAX_STEPS:
-                    nx_score += self.getScore(self.m_player1)
+                    nx_score += self.getScore()
 
                 # get score
-                [tmp_nx, _, _] = self.oneStep2(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
+                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
                 nx_score += tmp_nx
                 # reverse move
                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
