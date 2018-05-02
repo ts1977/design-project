@@ -77,10 +77,11 @@ class Player :
         if chessPrev in self.m_kings:
             self.m_kings.remove(chessPrev)
             self.m_kings.append(chessAfter)
-        if chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
+        elif chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
             self.m_kings.append(chessAfter)
 
-dir_kings = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+DIR_KINGS = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+
 class ChessBoard :
     class Status(Enum):
         INVALID = 0
@@ -112,8 +113,8 @@ class ChessBoard :
 
         self.m_player1.home_row = 0
         self.m_player2.home_row = 7
-        self.m_player1.dir_pawns = [[-1, 1], [-1, -1]]
-        self.m_player2.dir_pawns = [[1, 1], [1, -1]]
+        self.m_player1.dir_pawns = [[1, 1], [1, -1]]
+        self.m_player2.dir_pawns = [[-1, 1], [-1, -1]]
         self.m_curBoard = []
 
 
@@ -275,7 +276,7 @@ class ChessBoard :
         validRange = range(8)
         for chess in player1.chesses:
             if chess in player1.m_kings:
-                directions = dir_king
+                directions = DIR_KINGS
             else:
                 directions = player1.dir_pawns
             for d in directions:
@@ -393,8 +394,6 @@ class ChessBoard :
         myKings = player1.m_kings
         oppoKings = player2.m_kings
 
-        dir_king = [[1,1],[1,-1],[-1,1],[-1,-1]]
-
         capture_moves = [x for x in self.captures(player1, player2)]
 
         if capture_moves:
@@ -416,19 +415,19 @@ class ChessBoard :
                 score = model.eval(self.getBoardData(player1, player2))
 
                 if not self.win():
-                    if curStep <= self.MAX_STEPS:
+                    if curStep < self.MAX_STEPS:
                         [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
                         score += tmp_nx
 
                     if curStep%2 == 1:
                         # AI move (maximizer)
-                        if nx_score > bestScore:
+                        if score > bestScore:
                             bestScore = score
                             maxChessPrev = chess
                             maxChessAft = nx_chess
                     else:
                         # player move (minimizer)
-                        if nx_score < bestScore:
+                        if score < bestScore:
                             bestScore = score
                             maxChessPrev = chess
                             maxChessAft = nx_chess
@@ -448,7 +447,7 @@ class ChessBoard :
             for chess in myChess:
                 # iterate all directions
                 if chess in myKings:
-                    directions = dir_king
+                    directions = DIR_KINGS
                 else: directions = player1.dir_pawns
                 for d in directions:
                     nx_status = self.move(chess, d, myChess, oppoChess)
@@ -467,19 +466,19 @@ class ChessBoard :
                     score = model.eval(self.getBoardData(player1, player2))
 
                     if not self.win():
-                        if curStep <= self.MAX_STEPS:
+                        if curStep < self.MAX_STEPS:
                             [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
                             score += tmp_nx
 
                         if curStep%2 == 1:
                             # AI move (maximizer)
-                            if nx_score > bestScore:
+                            if score > bestScore:
                                 bestScore = score
                                 maxChessPrev = chess
                                 maxChessAft = nx_chess
                         else:
                             # player move (minimizer)
-                            if nx_score < bestScore:
+                            if score < bestScore:
                                 bestScore = score
                                 maxChessPrev = chess
                                 maxChessAft = nx_chess
