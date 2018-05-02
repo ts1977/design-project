@@ -84,6 +84,18 @@ class LearningModel:
         except:
             print("cant reload model, using default")
 
+    def mutate(self, model):
+        assert(len(model.w) == len(self.w))
+
+        idx = np.random.randint(self.m, size=self.m//3)
+
+        for i in range(self.m):
+            if i in idx:
+                r = np.random.uniform(low=1/3, high=3)
+                self.w[i] = r * model.w[i]
+            else:
+                self.w[i] = model.w[i]
+
     def logmove(self, x):
         x = np.array(x)
         self.moves = np.vstack((self.moves, x))
