@@ -198,13 +198,13 @@ class ChessBoard :
     def winText1(self, win):
         message = Text(Point(self.m_winWidth/2, self.m_winHeight/2), 'Player1 Wins')
         message.setTextColor('red')
-        message.setSize(40)
+        message.setSize(36)
         message.draw(win)
 
     def winText2(self, win):
         message = Text(Point(self.m_winWidth/2, self.m_winHeight/2), 'Player2 Wins')
         message.setTextColor('red')
-        message.setSize(40)
+        message.setSize(36)
         message.draw(win)
 
     """set choose chess to grey"""
