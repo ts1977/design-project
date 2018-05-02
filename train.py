@@ -23,12 +23,14 @@ class Game:
         self.m_chessBoard.setMaxSteps(s)
     def moveAIChess1(self,steps):
         print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
+        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
+        print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
     def moveAIChess2(self, steps):
         print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
+        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
+        print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
 

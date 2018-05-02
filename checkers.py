@@ -303,7 +303,7 @@ class ChessBoard :
         self.m_player2.chesses = [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]]
 
     # obtain the parameter of the chesses on the board
-    def getBoardData(self, player1, player2):
+    def getPlayerData(self, player1, player2):
         data = []
 
         n_edge = 0
@@ -330,33 +330,12 @@ class ChessBoard :
 
         num_capture = [x for x in self.captures(player1, player2)]
         data.append(len(num_capture))
+        return data
 
-        n_edge = 0
-        n_guard = 0
-        avg_dis = 0
-        n_pawns = 0
-        for chess in player2.chesses:
-            if chess.m_y == 0 or chess.m_y == 7:
-                n_edge += 1
-            if chess.m_x == player2.home_row:
-                n_guard+= 1
-            if chess not in player2.m_kings:
-                avg_dis += abs(player1.home_row-chess.m_x)
-                n_pawns += 1
-
-        data.append(len(player2.chesses))
-        data.append(len(player2.m_kings))
-        data.append(n_edge)
-        data.append(n_guard)
-
-        if n_pawns == 0:
-            data.append(0)
-        else:
-            data.append(avg_dis/n_pawns)
-
-        num_capture = [x for x in self.captures(player2, player1)]
-        data.append(len(num_capture))
-
+    def getBoardData(self, player1, player2):
+        data = []
+        data.extend(self.getPlayerData(player1, player2))
+        data.extend(self.getPlayerData(player2, player1))
         return data
 
 
