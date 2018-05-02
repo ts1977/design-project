@@ -66,12 +66,6 @@ class Player :
             self.chesses.append(Chess(pos[0], pos[1]))
 
     def moveChess(self, chessPrev, chessAfter):
-        # try:
-        #     self.chesses.remove(chessPrev)
-        # except:
-        #     print("chessPrev", chessPrev)
-        #     print("chessAft", chessAfter)
-        #     raise ValueError("x not in list")
         self.chesses.remove(chessPrev)
         self.chesses.append(chessAfter)
         if chessPrev in self.m_kings:

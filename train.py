@@ -25,12 +25,12 @@ class Game:
         print ("AI moving")
         [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
+        self.m_chessBoard.moveChess(self.player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
     def moveAIChess2(self, steps):
         print ("AI moving")
         [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
+        self.m_chessBoard.moveChess(self.player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
 
 
 if __name__ == '__main__':
@@ -47,9 +47,9 @@ if __name__ == '__main__':
             g.printChessTable()
             g.printPlayerChess()
             g.printAIChess()
-            g.moveAIChess2(steps)
-        else:
             g.moveAIChess1(steps)
+        else:
+            g.moveAIChess2(steps)
         steps += 1
         g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
 
