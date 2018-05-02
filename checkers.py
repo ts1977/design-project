@@ -45,6 +45,7 @@ class Player :
         self.being_attacked = False
         self.num_friend = 0
         self.m_name = name
+        self.m_model = LearningModel()
         for pos in startPositions:
             self.chesses.append(Chess(pos[0], pos[1]))
 
@@ -79,6 +80,7 @@ class Player :
         if chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
             self.m_kings.append(chessAfter)
 
+dir_kings = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
 class ChessBoard :
     class Status(Enum):
         INVALID = 0
@@ -107,7 +109,11 @@ class ChessBoard :
                 ]
         self.m_player1 = Player("player", [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]])
         self.m_player2 = Player("computer", [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
-        self.model = LearningModel()
+
+        self.m_player1.home_row = 0
+        self.m_player2.home_row = 7
+        self.m_player1.dir_pawns = [[-1, 1], [-1, -1]]
+        self.m_player2.dir_pawns = [[1, 1], [1, -1]]
         self.m_curBoard = []
 
 
@@ -265,44 +271,23 @@ class ChessBoard :
         for chess in self.m_player2.chesses:
             self.m_curBoard[chess.m_x][chess.m_y] = 'X'
 
-    def test_capture_player1(self):
-        dir_player = [[1,-1],[1,1]]
-        dir_king_player = [[1,-1],[1,1],[-1,1],[-1,-1]]
+    def captures(self, player1, player2):
         validRange = range(8)
-        for chess in self.m_player1.chesses:
-            if chess in self.m_player1.m_kings:
-                for d in dir_king_player:
-                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
-                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
-                    if aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in self.m_player2.chesses :
-                        return chess, aft
+        for chess in player1.chesses:
+            if chess in player1.m_kings:
+                directions = dir_king
             else:
-                for d in dir_player:
-                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
-                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                directions = player1.dir_pawns
+            for d in directions:
+                mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                if aft not in player1.chesses and aft not in player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in player2.chesses:
+                    yield mid, chess, aft
 
-                    if aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in self.m_player2.chesses :
-                        return chess, aft
-        return Chess(-1,-1), Chess(-1,-1)
+    def can_capture(self, player1, player2):
+        captures = [x for x in self.captures(player1, player2)]
+        return True if captures else False
 
-    def test_capture_player2(self):
-        dir_ai = [[-1,-1],[-1,1]]
-        dir_king_ai = [[1,-1],[1,1],[-1,1],[-1,-1]]
-        validRange = range(8)
-        for chess in self.m_player2.chesses:
-            if chess in self.m_player2.m_kings:
-                for d in dir_king_ai:
-                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
-                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
-                    if aft.m_x in validRange and aft.m_y in validRange and aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and mid in self.m_player1.chesses :
-                        return chess,aft
-            else:
-                for d in dir_ai:
-                    mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
-                    aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
-                    if aft.m_x in validRange and aft.m_y in validRange and aft not in self.m_player1.chesses and aft not in self.m_player2.chesses and mid in self.m_player1.chesses :
-                        return chess, aft
-        return Chess(-1,-1), Chess(-1,-1)
     """print chessboard"""
 
     def __str__(self):
@@ -323,24 +308,24 @@ class ChessBoard :
         self.m_player2.chesses = [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]]
 
     # obtain the parameter of the chesses on the board
-    def getBoardData(self):
+    def getBoardData(self, player1, player2):
         data = []
 
         n_edge = 0
         n_guard = 0
         avg_dis = 0
         n_pawns = 0
-        for chess in self.m_player1.chesses:
+        for chess in player1.chesses:
             if chess.m_y == 0 or chess.m_y == 7:
                 n_edge += 1
-            if chess.m_x == 0:
+            if chess.m_x == player1.home_row:
                 n_guard += 1
-            if chess not in self.m_player1.m_kings:
-                avg_dis += abs(7 - chess.m_x)
+            if chess not in player1.m_kings:
+                avg_dis += abs(player2.home_row - chess.m_x)
                 n_pawns += 1
 
-        data.append(len(self.m_player1.chesses))
-        data.append(len(self.m_player1.m_kings))
+        data.append(len(player1.chesses))
+        data.append(len(player1.m_kings))
         data.append(n_edge)
         data.append(n_guard)
         if n_pawns == 0:
@@ -348,27 +333,24 @@ class ChessBoard :
         else:
             data.append(avg_dis/n_pawns)
 
-        capturePrev, captureAft = self.test_capture_player2()
-        if capturePrev.m_x != -1:
-            data.append(1)
-        else:
-            data.append(0)
+        num_capture = [x for x in self.captures(player1, player2)]
+        data.append(len(num_capture))
 
         n_edge = 0
         n_guard = 0
         avg_dis = 0
         n_pawns = 0
-        for chess in self.m_player2.chesses:
+        for chess in player2.chesses:
             if chess.m_y == 0 or chess.m_y == 7:
                 n_edge += 1
-            if chess.m_x == 7:
+            if chess.m_x == player2.home_row:
                 n_guard+= 1
-            if chess not in self.m_player2.m_kings:
-                avg_dis += chess.m_x
+            if chess not in player2.m_kings:
+                avg_dis += abs(player1.home_row-chess.m_x)
                 n_pawns += 1
 
-        data.append(len(self.m_player2.chesses))
-        data.append(len(self.m_player2.m_kings))
+        data.append(len(player2.chesses))
+        data.append(len(player2.m_kings))
         data.append(n_edge)
         data.append(n_guard)
 
@@ -377,111 +359,139 @@ class ChessBoard :
         else:
             data.append(avg_dis/n_pawns)
 
-        # TODO: write function to count jumps
-
-        capturePrev2, captureAft2 = self.test_capture_player1()
-        if capturePrev2.m_x != -1:
-            data.append(1)
-        else:
-            data.append(0)
+        num_capture = [x for x in self.captures(player2, player1)]
+        data.append(len(num_capture))
 
         return data
 
-   
 
-    def getScore(self):
-        return self.model.eval(self.getBoardData())
+    def reverseMove(self, player1, player2, chessPrev, chessAft, remove_oppo, d):
+        myChess = player1.chesses
+        oppoChess = player2.chesses
 
-
-    def reverseMove(self, myChess, oppoChess, chessPrev, chessAft, remove_oppo, d):
-        # remove the previous move and restore to previous condition
         myChess.remove(chessAft)
         myChess.append(chessPrev)
+
+        if chessAft in player1.m_kings:
+            player1.m_kings.remove(chessAft)
+            player1.m_kings.append(chessPrev)
+
         if remove_oppo:
             oppoChess.append(Chess(chessPrev.m_x + d[0], chessPrev.m_y + d[1]))
 
 
-    def oneStep(self, myChess, oppoChess, curStep):
+    def oneStep(self, model, player1, player2, curStep):
         bestScore = -10000 if curStep%2 == 1 else 10000
         captureScore = -int(bestScore * 0.1)
-        winScore = -int(bestScore * 0.3)
+        winScore = -int(bestScore)
+        score = 0
         maxChessPrev = Chess()
         maxChessAft = Chess()
 
-        remove_oppo = False
-        remove_king = False
-        remove_edge = False
+        myChess = player1.chesses
+        oppoChess = player2.chesses
+        myKings = player1.m_kings
+        oppoKings = player2.m_kings
 
-        dir_chess = [[-1,-1], [-1,1]]
         dir_king = [[1,1],[1,-1],[-1,1],[-1,-1]]
-        capturePrev, captureAft =  self.test_capture_player2()
-        if capturePrev.m_x != -1 :
-            return 0, capturePrev, captureAft
-        # capturePrev2, captureAft2 = self.test_capture_player1()
-        # if capturePrev2.m_x != -1 :
-        #     for chess in myChess:
-        #         if chess in self.m_player2.m_kings:
-        #             directions = dir_king
-        #         else: directions = dir_chess
 
-        #         for d in directions:
-        #             nx_chess = Chess(chess.m_x + d[0], chess.m_y+d[1])
-        #             nx_status = self.move(chess, d, myChess, oppoChess)
-        #             if nx_status == self.Status.INVALID:
-        #                 continue
-        #             myChess.remove(chess)
-        #             myChess.append(nx_chess)
-        #             capturePrev3, captureAft3 = self.test_capture_player1()
-        #             if capturePrev3.m_x == -1:
-        #                 self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
-        #                 return 0, chess, nx_chess
-        # # iterate all chess
-        for chess in myChess:
-            # iterate all directions
-            if chess in self.m_player2.m_kings:
-                directions = dir_king
-            else: directions = dir_chess
-            for d in directions:
-                nx_status = self.move(chess, d, myChess, oppoChess)
-                nx_score = 0
-                nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
+        capture_moves = [x for x in self.captures(player1, player2)]
 
-                if (nx_status == self.Status.INVALID):
-                    continue
+        if capture_moves:
+            for captured, chess, nx_chess in capture_moves:
                 myChess.remove(chess)
                 myChess.append(nx_chess)
-                # if chess in self.m_player2.m_kings:
-                #     self.m_player2.m_kings.remove(chess)
-                #     self.m_player2.m_kings.append(nx_chess)
-                # if nx_chess.m_x  == 0 and chess in self.m_player2.chesses:
-                #     self.m_player2.m_kings.append(nx_chess)
-                if self.win():
-                    # reverse move
-                    self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
-                    return winScore, nx_chess, chess
 
-                # add score if this move make chess closer to enemy castle
-                if curStep == self.MAX_STEPS:
-                    nx_score += self.getScore()
+                if chess in myKings:
+                    myKings.remove(chess)
+                    myKings.append(nx_chess)
 
-                # get score
-                [tmp_nx, _, _] = self.oneStep(oppoChess, myChess, curStep + 1) if curStep <= self.MAX_STEPS else [nx_score,0,0]
-                nx_score += tmp_nx
-                # reverse move
-                self.reverseMove(myChess, oppoChess, chess, nx_chess, remove_oppo, d)
- 
-                if curStep%2 == 1:
-                    # AI move (maximizer)
-                    if nx_score > bestScore:
-                        bestScore = nx_score
-                        maxChessPrev = chess
-                        maxChessAft = nx_chess
+                oppoChess.remove(captured)
+                if captured in oppoKings:
+                    king_capture = True
+                    oppoKings.remove(captured)
                 else:
-                    # player move (minimizer)
-                    if nx_score < bestScore:
-                        bestScore = nx_score
+                    king_capture = False
+
+                score = model.eval(self.getBoardData(player1, player2))
+
+                if not self.win():
+                    if curStep <= self.MAX_STEPS:
+                        [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
+                        score += tmp_nx
+
+                    if curStep%2 == 1:
+                        # AI move (maximizer)
+                        if nx_score > bestScore:
+                            bestScore = score
+                            maxChessPrev = chess
+                            maxChessAft = nx_chess
+                    else:
+                        # player move (minimizer)
+                        if nx_score < bestScore:
+                            bestScore = score
+                            maxChessPrev = chess
+                            maxChessAft = nx_chess
+                else:
+                    maxChessPrev = chess
+                    maxChessAft = nx_chess
+
+                myChess.remove(nx_chess)
+                myChess.append(chess)
+                if nx_chess in myKings:
+                    myKings.remove(nx_chess)
+                    myKings.append(chess)
+                oppoChess.append(captured)
+                if king_capture:
+                    oppoKings.append(captured)
+        else:
+            for chess in myChess:
+                # iterate all directions
+                if chess in myKings:
+                    directions = dir_king
+                else: directions = player1.dir_pawns
+                for d in directions:
+                    nx_status = self.move(chess, d, myChess, oppoChess)
+                    nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
+
+                    if (nx_status == self.Status.INVALID):
+                        continue
+
+                    myChess.remove(chess)
+                    myChess.append(nx_chess)
+
+                    if chess in myKings:
+                        myKings.remove(chess)
+                        myKings.append(nx_chess)
+
+                    score = model.eval(self.getBoardData(player1, player2))
+
+                    if not self.win():
+                        if curStep <= self.MAX_STEPS:
+                            [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
+                            score += tmp_nx
+
+                        if curStep%2 == 1:
+                            # AI move (maximizer)
+                            if nx_score > bestScore:
+                                bestScore = score
+                                maxChessPrev = chess
+                                maxChessAft = nx_chess
+                        else:
+                            # player move (minimizer)
+                            if nx_score < bestScore:
+                                bestScore = score
+                                maxChessPrev = chess
+                                maxChessAft = nx_chess
+                    else:
                         maxChessPrev = chess
                         maxChessAft = nx_chess
+
+                    myChess.remove(nx_chess)
+                    myChess.append(chess)
+                    if nx_chess in myKings:
+                        myKings.remove(nx_chess)
+                        myKings.append(chess)
 
         return bestScore, maxChessPrev, maxChessAft
 

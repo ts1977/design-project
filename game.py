@@ -3,11 +3,14 @@ from checkers import *
 class Game:
     def __init__(self):
         self.m_chessBoard = ChessBoard()
+        self.player1 = self.m_chessBoard.m_player1
+        self.player2 = self.m_chessBoard.m_player2
         self.m_player1Chess = self.m_chessBoard.m_player1.chesses
         self.m_player2Chess = self.m_chessBoard.m_player2.chesses
         self.player1Kings = self.m_chessBoard.m_player1.m_kings
         self.player2Kings = self.m_chessBoard.m_player2.m_kings
-        self.model = self.m_chessBoard.model
+        self.model1 = self.m_chessBoard.m_player1.m_model
+        self.model2 = self.m_chessBoard.m_player2.m_model
     def end(self):
         return self.m_chessBoard.win()
     def printChessTable(self):
@@ -24,12 +27,12 @@ class Game:
         self.m_chessBoard.setMaxSteps(s)
     def moveAIChess1(self,steps):
         print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.m_player2Chess, self.m_player1Chess, 1)
+        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
     def moveAIChess2(self, steps):
         print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep2(self.m_player1Chess, self.m_player2Chess, 1)
+        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
 
@@ -79,8 +82,7 @@ if __name__ == '__main__':
                     g.m_chessBoard.removeError(win)
                 status = board.move(preChess, [delta_x, delta_y], player1Chess, player2Chess)
                 # status = board.move(preChess, aftChess, playerChess, oppoChess)
-                capturePrev, captureAft = g.m_chessBoard.test_capture_player1()
-                if capturePrev.m_x != -1:
+                if g.m_chessBoard.can_capture(g.player1, g.player2):
                     if  status != g.m_chessBoard.Status.CAPTURE:
                         status = board.move(preChess, [delta_x, delta_y], player1Chess, player2Chess)
                         g.m_chessBoard.displayError2(win)
@@ -96,7 +98,7 @@ if __name__ == '__main__':
             else:
                 g.moveAIChess1(steps)
             steps += 1
-            g.model.logmove(g.m_chessBoard.getBoardData())
+            g.model2.logmove(g.m_chessBoard.getBoardData(g.player2, g.player1))
 
 
     elif select.y >= 700 and select.y <= 775:
@@ -129,9 +131,7 @@ if __name__ == '__main__':
                     g.m_chessBoard.removeError(win)
                 status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
                 # status = board.move(preChess, aftChess, playerChess, oppoChess)
-
-                capturePrev, captureAft = g.m_chessBoard.test_capture_player2()
-                if capturePrev.m_x != -1:
+                if g.m_chessBoard.can_capture(g.player2, g.player1):
                     if  status != g.m_chessBoard.Status.CAPTURE:
                         status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
                         g.m_chessBoard.displayError2(win)
@@ -173,4 +173,4 @@ if __name__ == '__main__':
     win.getMouse()
     win.close()
 
-    g.model.analyze_result()
+    g.model2.analyze_result()
