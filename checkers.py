@@ -302,18 +302,17 @@ class ChessBoard :
                     yield mid, chess, aft
 
     def possible_moves(self, player1, player2):
-        capture_moves = [x for x in self.captures(self, player1, player2)]
+        capture_moves = [x for x in self.captures(player1, player2)]
         valid = range(8)
 
         if capture_moves:
-            for m in capture_moves:
-                yield m
-        else:
-            for chess in player1.chesses:
-                if chess in player1.m_kings:
-                    directions = DIR_KINGS
-                else:
-                    directions = player1.dir_pawns
+            return capture_moves
+
+        for chess in player1.chesses:
+            if chess in player1.m_kings:
+                directions = DIR_KINGS
+            else:
+                directions = player1.dir_pawns
             for d in directions:
                 nx = Chess(chess.m_x+d[0], chess.m_y+d[1])
                 if nx.m_x in valid and nx.m_y in valid and nx not in player1.chesses and nx not in player2.chesses:
@@ -434,25 +433,25 @@ class ChessBoard :
 
             if not self.win():
                 if curStep < self.MAX_STEPS:
-                    [score_ahead, _, _] = self.oneStep(model, player2, player1, curStep + 1)
-                    score += score_ahead
-
-                if curStep%2 == 1:
-                    # AI move (maximizer)
-                    if not bestScore or score > bestScore:
-                        bestScore = score
-                        maxChessPrev = chess
-                        maxChessAft = nx_chess
-                else:
-                    # player move (minimizer)
-                    if not bestScore or score < bestScore:
-                        bestScore = score
-                        maxChessPrev = chess
-                        maxChessAft = nx_chess
+                    [nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
+                    score += nx
             else:
-                bestScore = score
-                maxChessPrev = chess
-                maxChessAft = nx_chess
+                score = float('inf')
+                score = -score if curStep%2 == 0 else score
+                return score, chess, nx_chess
+
+            if curStep%2 == 1:
+                # AI move (maximizer)
+                if not bestScore or score > bestScore:
+                    bestScore = score
+                    maxChessPrev = chess
+                    maxChessAft = nx_chess
+            else:
+                # player move (minimizer)
+                if not bestScore or score < bestScore:
+                    bestScore = score
+                    maxChessPrev = chess
+                    maxChessAft = nx_chess
 
             myChess.remove(nx_chess)
             myChess.append(chess)
