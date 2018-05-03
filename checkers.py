@@ -360,7 +360,7 @@ class ChessBoard :
             if 1 < chess.m_x < 6 and 1 < chess.m_y < 6:
                 n_center += 1
             if chess not in player1.m_kings:
-                avg_dis += abs(player2.home_row - chess.m_x)
+                avg_dis += (abs(player2.home_row - chess.m_x) / 7)
                 n_pawns += 1
                 if chess.m_x == player1.home_row:
                     n_guard += 1
@@ -368,19 +368,30 @@ class ChessBoard :
             for opp in player2.chesses:
                 agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2)
 
-        data.append(len(player1.chesses))
-        data.append(len(player1.m_kings))
-        data.append(n_edge)
-        data.append(n_guard)
-        data.append(n_center)
-        data.append(agg_dis)
-        if n_pawns == 0:
+        n_pieces = len(player1.chesses)
+        data.append(n_pieces/12)
+        data.append(len(player1.m_kings)/12)
+
+        if n_pieces == 0:
+            data.append(0)
+            data.append(0)
             data.append(0)
         else:
+            data.append(n_edge/n_pieces)
+            data.append(n_center/n_pieces)
+            data.append(agg_dis/n_pieces)
+
+        if n_pawns == 0:
+            data.append(0)
+            data.append(0)
+        else:
+            data.append(n_guard/n_pawns)
             data.append(avg_dis/n_pawns)
 
         num_capture = list(self.captures(player1, player2))
-        data.append(len(num_capture))
+        n_opp = len(player2.chesses)
+        data.append(len(num_capture)/n_opp)
+
         return data
 
     def getBoardData(self, player1, player2):
