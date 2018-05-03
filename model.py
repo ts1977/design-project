@@ -24,6 +24,7 @@ class LearningModel:
         winning,
         losing
         '''
+        '''
         self.board_init = np.array(
             [12, 0, 3, 4, 2, 851, 6.0, 0, 12, 0, 3, 4, 2, 851, 6.0, 0]
         )
@@ -36,28 +37,30 @@ class LearningModel:
                 complete + reverse,
                 reverse + complete
         ])
+        '''
 
         '''
         initial board has score 0
         winning has score 1000
         losing has score -1000
         '''
+        '''
         self.base_y = np.array([
             [    0],
             [ 1000],
             [-1000],
         ])
-
-        self.m = len(self.board_init) # number of features
-        self.w = np.zeros((self.m,1))
+        '''
+        self.m = 16 #len(self.board_init) # number of features
+        self.w = np.random.random((self.m,1))
         self.mu = 0.0000005
         self.lambd = 0.001
         self.moves = None
         self.oppo = None
         #self.moves = np.array(self.board_init)
 
-        for i in range(int(1e3*self.lambd)):
-            self.calibrate()
+        #for i in range(int(1e3*self.lambd)):
+        #    self.calibrate()
 
     # method used to evaluate a board as
     # categorized by feature vector x

@@ -366,7 +366,7 @@ class ChessBoard :
                     n_guard += 1
 
             for opp in player2.chesses:
-                agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2)
+                agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2) / 100
 
         n_pieces = len(player1.chesses)
         data.append(n_pieces/12)
@@ -390,7 +390,10 @@ class ChessBoard :
 
         num_capture = list(self.captures(player1, player2))
         n_opp = len(player2.chesses)
-        data.append(len(num_capture)/n_opp)
+        if n_opp == 0:
+            data.append(0)
+        else:
+            data.append(len(num_capture)/n_opp)
 
         return data
 
