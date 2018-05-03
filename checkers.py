@@ -434,24 +434,15 @@ class ChessBoard :
             if not self.win():
                 if curStep < self.MAX_STEPS:
                     [nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
-                    score += nx
+                    score -= nx
             else:
                 score = float('inf')
-                score = -score if curStep%2 == 0 else score
                 return score, chess, nx_chess
 
-            if curStep%2 == 1:
-                # AI move (maximizer)
-                if not bestScore or score > bestScore:
-                    bestScore = score
-                    maxChessPrev = chess
-                    maxChessAft = nx_chess
-            else:
-                # player move (minimizer)
-                if not bestScore or score < bestScore:
-                    bestScore = score
-                    maxChessPrev = chess
-                    maxChessAft = nx_chess
+            if not bestScore or score > bestScore:
+                bestScore = score
+                maxChessPrev = chess
+                maxChessAft = nx_chess
 
             myChess.remove(nx_chess)
             myChess.append(chess)
