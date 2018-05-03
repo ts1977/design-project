@@ -1,6 +1,8 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 import time
+from datetime import datetime
 import pickle
 import os
 
@@ -118,19 +120,30 @@ class LearningModel:
         print("init w:", self.w)
 
         n_moves = self.moves.shape[0]
-        n_times = 2500
+        n_times = int(2e6 / n_moves)
 
-        for _ in range(n_times):
-            self.w += self.mu * (score_last - self.eval(list(last_play))) * last_play.reshape(self.m,1)
+        wtmp = self.w
+
+        for i in range(n_times):
+            print("iteration", i, "of", n_times, end='\r')
+
+            wtmp = wtmp + self.mu * (score_last - self.eval(list(last_play))) * last_play.reshape(self.m,1)
             for i in range(n_moves-2, -1, -1):
                 curr = self.moves[i]
                 succ = self.moves[i+1]
-                self.w += self.mu * (self.eval(list(succ)) - self.eval(list(curr))) * curr.reshape(self.m,1)
-            self.w += self.mu * (0 - self.eval(self.moves[0])) * self.moves[0].reshape(self.m,1)
+                wtmp = wtmp + self.mu * (self.eval(list(succ)) - self.eval(list(curr))) * curr.reshape(self.m,1)
+
+            self.w = wtmp
+
+            wtmp = wtmp + self.mu * (0 - self.eval(self.moves[0])) * self.moves[0].reshape(self.m,1)
             for i in range(0, n_moves-1, 1):
                 curr = self.moves[i]
                 succ = self.moves[i+1]
-                self.w += self.mu * (self.eval(list(succ)) - self.eval((curr))) * curr.reshape(self.m,1)
+                wtmp = wtmp + self.mu * (self.eval(list(succ)) - self.eval((curr))) * curr.reshape(self.m,1)
+
+            self.w = wtmp
+
+        print("iteration", n_times, "of", n_times)
 
         with open("w.pl", "wb") as f:
             pickle.dump(self.w, f)

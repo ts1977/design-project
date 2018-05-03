@@ -319,6 +319,7 @@ class ChessBoard :
                 nx = Chess(chess.m_x+d[0], chess.m_y+d[1])
                 if nx.m_x in valid and nx.m_y in valid and nx not in player1.chesses and nx not in player2.chesses:
                     yield None, chess, nx
+        return
 
     def can_capture(self, player1, player2):
         captures = list(self.captures(player1, player2))

@@ -30,10 +30,10 @@ class Game:
         if random.random() < RANDOM_MOVE:
             print("random!")
             moves = list(self.m_chessBoard.possible_moves(self.player1, self.player2))
-            [(score, chessPrev, chessAft)] = random.sample(moves, 1)
+            [(_, chessPrev, chessAft)] = random.sample(moves, 1)
         else:
             [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
-        print("score = ", score)
+            print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
     def moveAIChess2(self, steps):
@@ -41,10 +41,10 @@ class Game:
         if random.random() < RANDOM_MOVE:
             print("random!")
             moves = list(self.m_chessBoard.possible_moves(self.player2, self.player1))
-            [(score, chessPrev, chessAft)] = random.sample(moves, 1)
+            [(_, chessPrev, chessAft)] = random.sample(moves, 1)
         else:
             [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
-        print("score = ", score)
+            print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
 
@@ -69,6 +69,7 @@ def play():
         steps += 1
         g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
 
+    print("steps", steps)
     g.model1.analyze_result()
     return g.model1
 
