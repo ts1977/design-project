@@ -1,5 +1,8 @@
 from checkers import *
 import numpy as np
+import random
+
+RANDOM_MOVE = 0.2
 
 class Game:
     def __init__(self):
@@ -24,13 +27,23 @@ class Game:
         self.m_chessBoard.setMaxSteps(s)
     def moveAIChess1(self,steps):
         print ("AI moving")
-        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
+        if random.random() < RANDOM_MOVE:
+            print("random!")
+            moves = list(self.m_chessBoard.possible_moves(self.player1, self.player2))
+            [(score, chessPrev, chessAft)] = random.sample(moves, 1)
+        else:
+            [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
         print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
     def moveAIChess2(self, steps):
         print ("AI moving")
-        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
+        if random.random() < RANDOM_MOVE:
+            print("random!")
+            move = list(self.m_chessBoard.possible_moves(self.player2, self.player1))
+            [(score, chessPrev, chessAft)] = random.sample(moves, 1)
+        else:
+            [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
         print("score = ", score)
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(self.player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
@@ -60,12 +73,4 @@ def play():
     return g.model1
 
 if __name__ == '__main__':
-    norms = []
-    m = play()
-    for _ in range(40):
-        nm = play()
-        norm = np.linalg.norm(m.w - nm.w)
-        norms.append(norm)
-
-    print(norms)
-
+    play()
