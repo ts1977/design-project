@@ -305,8 +305,10 @@ class ChessBoard :
         capture_moves = [x for x in self.captures(player1, player2)]
         valid = range(8)
 
-        if capture_moves:
-            return capture_moves
+        if len(capture_moves) > 0:
+            for m in capture_moves:
+                yield m
+            return
 
         for chess in player1.chesses:
             if chess in player1.m_kings:
@@ -437,7 +439,6 @@ class ChessBoard :
                     score -= nx
             else:
                 score = float('inf')
-                return score, chess, nx_chess
 
             if not bestScore or score > bestScore:
                 bestScore = score
