@@ -1,5 +1,4 @@
 from graphics import *
-
 from enum import Enum
 from copy import copy, deepcopy
 import unittest
@@ -302,6 +301,24 @@ class ChessBoard :
                 if aft not in player1.chesses and aft not in player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in player2.chesses:
                     yield mid, chess, aft
 
+    def possible_moves(self, player1, player2):
+        capture_moves = [x for x in self.captures(self, player1, player2)]
+        valid = range(8)
+
+        if capture_moves:
+            for m in capture_moves:
+                yield m
+        else:
+            for chess in player1.chesses:
+                if chess in player1.m_kings:
+                    directions = DIR_KINGS
+                else:
+                    directions = player1.dir_pawns
+            for d in directions:
+                nx = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                if nx.m_x in valid and nx.m_y in valid and nx not in player1.chesses and nx not in player2.chesses:
+                    yield None, chess, nx
+
     def can_capture(self, player1, player2):
         captures = [x for x in self.captures(player1, player2)]
         return True if captures else False
@@ -397,17 +414,15 @@ class ChessBoard :
         myKings = player1.m_kings
         oppoKings = player2.m_kings
 
-        capture_moves = [x for x in self.captures(player1, player2)]
+        for captured, chess, nx_chess in self.possible_moves(player1, player2):
+            myChess.remove(chess)
+            myChess.append(nx_chess)
 
-        if capture_moves:
-            for captured, chess, nx_chess in capture_moves:
-                myChess.remove(chess)
-                myChess.append(nx_chess)
+            if chess in myKings:
+                myKings.remove(chess)
+                myKings.append(nx_chess)
 
-                if chess in myKings:
-                    myKings.remove(chess)
-                    myKings.append(nx_chess)
-
+            if captured:
                 oppoChess.remove(captured)
                 if captured in oppoKings:
                     king_capture = True
@@ -415,87 +430,40 @@ class ChessBoard :
                 else:
                     king_capture = False
 
-                score = model.eval(self.getBoardData(player1, player2))
+            score = model.eval(self.getBoardData(player1, player2))
 
-                if not self.win():
-                    if curStep < self.MAX_STEPS:
-                        [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
-                        score += tmp_nx
+            if not self.win():
+                if curStep < self.MAX_STEPS:
+                    [score_ahead, _, _] = self.oneStep(model, player2, player1, curStep + 1)
+                    score += score_ahead
 
-                    if curStep%2 == 1:
-                        # AI move (maximizer)
-                        if not bestScore or score > bestScore:
-                            bestScore = score
-                            maxChessPrev = chess
-                            maxChessAft = nx_chess
-                    else:
-                        # player move (minimizer)
-                        if not bestScore or score < bestScore:
-                            bestScore = score
-                            maxChessPrev = chess
-                            maxChessAft = nx_chess
-                else:
-                    bestScore = score
-                    maxChessPrev = chess
-                    maxChessAft = nx_chess
-
-                myChess.remove(nx_chess)
-                myChess.append(chess)
-                if nx_chess in myKings:
-                    myKings.remove(nx_chess)
-                    myKings.append(chess)
-                oppoChess.append(captured)
-                if king_capture:
-                    oppoKings.append(captured)
-        else:
-            for chess in myChess:
-                # iterate all directions
-                if chess in myKings:
-                    directions = DIR_KINGS
-                else: directions = player1.dir_pawns
-                for d in directions:
-                    nx_status = self.move(chess, d, myChess, oppoChess)
-                    nx_chess = Chess(chess.m_x + d[0]*1, chess.m_y + d[1]*1)
-
-                    if (nx_status == self.Status.INVALID):
-                        continue
-
-                    myChess.remove(chess)
-                    myChess.append(nx_chess)
-
-                    if chess in myKings:
-                        myKings.remove(chess)
-                        myKings.append(nx_chess)
-
-                    score = model.eval(self.getBoardData(player1, player2))
-
-                    if not self.win():
-                        if curStep < self.MAX_STEPS:
-                            [tmp_nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
-                            score += tmp_nx
-
-                        if curStep%2 == 1:
-                            # AI move (maximizer)
-                            if not bestScore or score > bestScore:
-                                bestScore = score
-                                maxChessPrev = chess
-                                maxChessAft = nx_chess
-                        else:
-                            # player move (minimizer)
-                            if not bestScore or score < bestScore:
-                                bestScore = score
-                                maxChessPrev = chess
-                                maxChessAft = nx_chess
-                    else:
+                if curStep%2 == 1:
+                    # AI move (maximizer)
+                    if not bestScore or score > bestScore:
                         bestScore = score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
+                else:
+                    # player move (minimizer)
+                    if not bestScore or score < bestScore:
+                        bestScore = score
+                        maxChessPrev = chess
+                        maxChessAft = nx_chess
+            else:
+                bestScore = score
+                maxChessPrev = chess
+                maxChessAft = nx_chess
 
-                    myChess.remove(nx_chess)
-                    myChess.append(chess)
-                    if nx_chess in myKings:
-                        myKings.remove(nx_chess)
-                        myKings.append(chess)
+            myChess.remove(nx_chess)
+            myChess.append(chess)
+            if nx_chess in myKings:
+                myKings.remove(nx_chess)
+                myKings.append(chess)
+
+            if captured:
+                oppoChess.append(captured)
+                if king_capture:
+                    oppoKings.append(captured)
 
         if not bestScore:
             print(player1)
