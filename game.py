@@ -102,8 +102,6 @@ if __name__ == '__main__':
             else:
                 g.moveAIChess1(steps)
             steps += 1
-            g.model2.logmove(g.m_chessBoard.getBoardData(g.player2, g.player1))
-
 
     elif select.y >= 700 and select.y <= 775:
         while not g.end():
@@ -182,5 +180,3 @@ if __name__ == '__main__':
     win.autoflush = True
     win.getMouse()
     win.close()
-
-    g.model2.analyze_result()

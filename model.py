@@ -119,25 +119,30 @@ class LearningModel:
         else:
             self.oppo = np.vstack((self.oppo, x))
 
-    def analyze_result(self):
+    def analyze_result(self, win):
 
-        print(self.moves.shape)
-        print("oppo")
-        print(self.oppo.shape)
-        return
-
-        last_play = self.moves[-1]
-
-        if last_play[0] > last_play[self.m//2]:
+        if win > 0:
             score_last = 1000
-        else:
+        elif win < 0:
             score_last = -1000
+        else:
+            score_last = 0
+
+        self.analyze_player(self.moves, score_last)
+        self.analyze_player(self.oppo, -score_last)
 
         print("init w:", self.w)
 
-        n_moves = self.moves.shape[0]
+        with open("w.pl", "wb") as f:
+            pickle.dump(self.w, f)
+
+        print("new w:", self.w)
+
+    def analyze_player(self, moves, score_last):
+        n_moves = moves.shape[0]
         n_times = int(2e6 / n_moves)
 
+        last_play = moves[-1]
         wtmp = self.w
 
         for i in range(n_times):
@@ -161,7 +166,5 @@ class LearningModel:
 
         print("iteration", n_times, "of", n_times)
 
-        with open("w.pl", "wb") as f:
-            pickle.dump(self.w, f)
 
-        print("new w:", self.w)
+

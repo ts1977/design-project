@@ -406,7 +406,7 @@ class ChessBoard :
 
 
     def oneStep(self, model, player1, player2, curStep):
-        bestScore = -float('inf')
+        bestScore = None
         score = 0
         maxChessPrev = Chess()
         maxChessAft = Chess()
@@ -444,7 +444,7 @@ class ChessBoard :
             else:
                 score = float('inf')
 
-            if score > bestScore:
+            if not bestScore or score > bestScore:
                 bestScore = score
                 maxChessPrev = chess
                 maxChessAft = nx_chess
@@ -460,7 +460,7 @@ class ChessBoard :
                 if king_capture:
                     oppoKings.append(captured)
 
-        if not bestScore:
+        if bestScore is None:
             print(player1)
             print(player2)
             print(self.can_capture(player1, player2))

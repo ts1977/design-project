@@ -71,7 +71,10 @@ def play():
         steps += 1
 
     print("steps", steps)
-    g.model1.analyze_result()
+    if g.player1.lost(g.player2):
+        g.model1.analyze_result(-1)
+    else:
+        g.model1.analyze_result(1)
     return g.model1
 
 if __name__ == '__main__':
