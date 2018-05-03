@@ -39,7 +39,7 @@ class Game:
 
 if __name__ == '__main__':
     g = Game()
-    g.setMaxSteps(1)
+    g.setMaxSteps(3)
     chess = Chess()
     board = g.m_chessBoard
     player1Chess= board.m_player1.chesses
