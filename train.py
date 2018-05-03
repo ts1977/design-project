@@ -1,4 +1,5 @@
 from checkers import *
+import numpy as np
 
 class Game:
     def __init__(self):
@@ -35,20 +36,20 @@ class Game:
         self.m_chessBoard.moveChess(self.player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
 
 
-if __name__ == '__main__':
+def play():
     g = Game()
     g.setMaxSteps(3)
     board = g.m_chessBoard
     steps = 0
 
-    #g.model1.reload_model()
-    #g.model2.mutate(g.model1)
+    g.model1.reload_model()
+    g.model2.mutate(g.model1)
 
     while not g.end():
+        g.printChessTable()
+        g.printPlayerChess()
+        g.printAIChess()
         if  steps % 2 == 0:
-            g.printChessTable()
-            g.printPlayerChess()
-            g.printAIChess()
             g.moveAIChess1(steps)
         else:
             g.moveAIChess2(steps)
@@ -56,3 +57,15 @@ if __name__ == '__main__':
         g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
 
     g.model1.analyze_result()
+    return g.model1
+
+if __name__ == '__main__':
+    norms = []
+    m = play()
+    for _ in range(40):
+        nm = play()
+        norm = np.linalg.norm(m.w - nm.w)
+        norms.append(norm)
+
+    print(norms)
+

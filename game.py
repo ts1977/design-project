@@ -1,4 +1,5 @@
 from checkers import *
+import time
 
 class Game:
     def __init__(self):
@@ -48,6 +49,9 @@ if __name__ == '__main__':
 
     g.m_chessBoard.displayButton(win)
     g.m_chessBoard.displayText(win)
+
+    g.model1.reload_model()
+    g.model2.reload_model()
 
     select = win.getMouse()
     while not (select.x >= 750 and select.x <= 950) and ((select.y >= 600 and select.y <= 675) or (select.y >= 700 and select.y <= 775) or (select.y >= 800 and select.y <= 875)):
@@ -170,6 +174,12 @@ if __name__ == '__main__':
         g.m_chessBoard.winText2(win)
     else:
         g.m_chessBoard.winText1(win)
+    win.autoflush = False
+    g.m_chessBoard.displayBoard(win)
+    g.m_chessBoard.displayChess(win)
+    g.m_chessBoard.displayButton(win)
+    g.m_chessBoard.displayText(win)
+    win.autoflush = True
     win.getMouse()
     win.close()
 

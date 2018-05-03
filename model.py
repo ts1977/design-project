@@ -24,13 +24,16 @@ class LearningModel:
         losing
         '''
         self.board_init = np.array(
-                [12, 0, 3, 4, 6, 0, 12, 0, 3, 4, 6, 0]
-                )
+            [12, 0, 3, 4, 2, 851, 6.0, 0, 12, 0, 3, 4, 2, 851, 6.0, 0]
+        )
+
+        complete = [12, 12, 12, 12, 12,    0, 0, 0]
+        reverse =  [ 0,  0,  0,  0,  0, 1000, 7, 0]
 
         self.base_x = np.array([
                 self.board_init,
-                [12, 12, 12, 12, 0, 12, 0, 0, 0, 0, 7, 0],
-                [0, 0, 0, 0, 7, 0, 12, 12, 12, 12, 0, 12],
+                complete + reverse,
+                reverse + complete
         ])
 
         '''
@@ -44,9 +47,9 @@ class LearningModel:
             [-1000],
         ])
 
-        self.m = 12  # number of features
+        self.m = len(self.board_init) # number of features
         self.w = np.zeros((self.m,1))
-        self.mu = 0.1
+        self.mu = 0.000001
         self.lambd = 0.001
         self.moves = np.array(self.board_init)
 
@@ -78,20 +81,23 @@ class LearningModel:
         self.w += (self.mu/self.base_x.shape[0]) * delta
 
     def reload_model(self):
+        print("loading model...", end='')
+
         try:
             with open("w.pl", "rb") as f:
                 self.w = pickle.load(f)
+            print("done")
         except:
-            print("cant reload model, using default")
+            print("failed")
 
     def mutate(self, model):
         assert(len(model.w) == len(self.w))
 
-        idx = np.random.randint(self.m, size=self.m//3)
+        idx = np.random.randint(self.m, size=self.m//2)
 
         for i in range(self.m):
             if i in idx:
-                r = np.random.uniform(low=1/3, high=3)
+                r = np.random.uniform(low=1/10, high=10)
                 self.w[i] = r * model.w[i]
             else:
                 self.w[i] = model.w[i]
@@ -103,14 +109,11 @@ class LearningModel:
     def analyze_result(self):
 
         last_play = self.moves[-1]
-        if last_play[0] == 0:
-            won = False
-            score_last = -1000
-        elif last_play[6] == 0:
-            won = True
+
+        if last_play[0] > last_play[self.m//2]:
             score_last = 1000
         else:
-            raise Exception("Neither Player has Lost")
+            score_last = -1000
 
         print("init w:", self.w)
 
@@ -118,16 +121,18 @@ class LearningModel:
         n_times = 2500
 
         for _ in range(n_times):
-            self.w += self.mu * (score_last - self.eval(last_play)) * last_play
+            self.w += self.mu * (score_last - self.eval(list(last_play))) * last_play.reshape(self.m,1)
             for i in range(n_moves-2, -1, -1):
                 curr = self.moves[i]
                 succ = self.moves[i+1]
-                self.w += self.mu * (self.eval(succ) - self.eval(curr)) * curr
-            self.w += self.mu * (0 - self.eval(self.moves[0])) * self.moves[0]
+                self.w += self.mu * (self.eval(list(succ)) - self.eval(list(curr))) * curr.reshape(self.m,1)
+            self.w += self.mu * (0 - self.eval(self.moves[0])) * self.moves[0].reshape(self.m,1)
             for i in range(0, n_moves-1, 1):
                 curr = self.moves[i]
                 succ = self.moves[i+1]
-                self.w += self.mu * (self.eval(succ) - self.eval(curr)) * curr
+                self.w += self.mu * (self.eval(list(succ)) - self.eval((curr))) * curr.reshape(self.m,1)
 
         with open("w.pl", "wb") as f:
             pickle.dump(self.w, f)
+
+        print("new w:", self.w)

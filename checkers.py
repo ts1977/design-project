@@ -6,6 +6,7 @@ import unittest
 import sys
 import random
 from model import LearningModel
+from math import sqrt
 
 p_piece = random.randint(0, 1)
 p_king = random.randint(1, 100)
@@ -57,6 +58,10 @@ class Player :
 
     def size(self):
         return len(self.chesses)
+
+    def __len__(self):
+        return len(self.chesses)
+
     def empty(self):
         return self.size() == 0
 
@@ -73,6 +78,24 @@ class Player :
             self.m_kings.append(chessAfter)
         elif chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
             self.m_kings.append(chessAfter)
+
+    def lost(self, opp):
+        if len(self) == 0:
+            return True
+
+        valid = range(8)
+        for chess in self.chesses:
+            if chess in self.m_kings:
+                dirs = DIR_KINGS
+            else:
+                dirs = self.dir_pawns
+
+            for d in dirs:
+                nx = Chess(chess.m_x + d[0], chess.m_y + d[1])
+                if nx.m_x in valid and nx.m_y in valid and nx not in self.chesses and nx not in opp.chesses:
+                    return False
+
+        return True
 
 DIR_KINGS = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
 
@@ -295,8 +318,7 @@ class ChessBoard :
 
     """return true when there is a winner"""
     def win(self):
-        self.applyPlayer()
-        return self.m_player1.size() == 0 or self.m_player2.size() == 0
+        return self.m_player1.lost(self.m_player2) or self.m_player2.lost(self.m_player1)
 
     def reset(self):
         self.m_player1.chesses = [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]]
@@ -310,19 +332,29 @@ class ChessBoard :
         n_guard = 0
         avg_dis = 0
         n_pawns = 0
+        n_center = 0
+        agg_dis = 0
+
         for chess in player1.chesses:
             if chess.m_y == 0 or chess.m_y == 7:
                 n_edge += 1
-            if chess.m_x == player1.home_row:
-                n_guard += 1
+            if 1 < chess.m_x < 6 and 1 < chess.m_y < 6:
+                n_center += 1
             if chess not in player1.m_kings:
                 avg_dis += abs(player2.home_row - chess.m_x)
                 n_pawns += 1
+                if chess.m_x == player1.home_row:
+                    n_guard += 1
+
+            for opp in player2.chesses:
+                agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2)
 
         data.append(len(player1.chesses))
         data.append(len(player1.m_kings))
         data.append(n_edge)
         data.append(n_guard)
+        data.append(n_center)
+        data.append(agg_dis)
         if n_pawns == 0:
             data.append(0)
         else:
@@ -355,9 +387,7 @@ class ChessBoard :
 
 
     def oneStep(self, model, player1, player2, curStep):
-        bestScore = -10000 if curStep%2 == 1 else 10000
-        captureScore = -int(bestScore * 0.1)
-        winScore = -int(bestScore)
+        bestScore = None
         score = 0
         maxChessPrev = Chess()
         maxChessAft = Chess()
@@ -394,17 +424,18 @@ class ChessBoard :
 
                     if curStep%2 == 1:
                         # AI move (maximizer)
-                        if score > bestScore:
+                        if not bestScore or score > bestScore:
                             bestScore = score
                             maxChessPrev = chess
                             maxChessAft = nx_chess
                     else:
                         # player move (minimizer)
-                        if score < bestScore:
+                        if not bestScore or score < bestScore:
                             bestScore = score
                             maxChessPrev = chess
                             maxChessAft = nx_chess
                 else:
+                    bestScore = score
                     maxChessPrev = chess
                     maxChessAft = nx_chess
 
@@ -445,17 +476,18 @@ class ChessBoard :
 
                         if curStep%2 == 1:
                             # AI move (maximizer)
-                            if score > bestScore:
+                            if not bestScore or score > bestScore:
                                 bestScore = score
                                 maxChessPrev = chess
                                 maxChessAft = nx_chess
                         else:
                             # player move (minimizer)
-                            if score < bestScore:
+                            if not bestScore or score < bestScore:
                                 bestScore = score
                                 maxChessPrev = chess
                                 maxChessAft = nx_chess
                     else:
+                        bestScore = score
                         maxChessPrev = chess
                         maxChessAft = nx_chess
 
@@ -464,6 +496,11 @@ class ChessBoard :
                     if nx_chess in myKings:
                         myKings.remove(nx_chess)
                         myKings.append(chess)
+
+        if not bestScore:
+            print(player1)
+            print(player2)
+            print(self.can_capture(player1, player2))
 
         return bestScore, maxChessPrev, maxChessAft
 
