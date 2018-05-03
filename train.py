@@ -51,7 +51,7 @@ class Game:
 
 def play():
     g = Game()
-    g.setMaxSteps(3)
+    g.setMaxSteps(2)
     board = g.m_chessBoard
     steps = 0
 
@@ -63,11 +63,11 @@ def play():
         g.printPlayerChess()
         g.printAIChess()
         if  steps % 2 == 0:
-            g.model1.logoppo(g.m_chessBoard.getBoardData(g.player2, g.player1))
             g.moveAIChess1(steps)
             g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
         else:
             g.moveAIChess2(steps)
+            g.model1.logoppo(g.m_chessBoard.getBoardData(g.player2, g.player1))
         steps += 1
 
     print("steps", steps)

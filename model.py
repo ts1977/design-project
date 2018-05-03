@@ -50,7 +50,7 @@ class LearningModel:
 
         self.m = len(self.board_init) # number of features
         self.w = np.zeros((self.m,1))
-        self.mu = 0.000001
+        self.mu = 0.0000005
         self.lambd = 0.001
         self.moves = None
         self.oppo = None
@@ -128,10 +128,10 @@ class LearningModel:
         else:
             score_last = 0
 
+        print("init w:", self.w)
+
         self.analyze_player(self.moves, score_last)
         self.analyze_player(self.oppo, -score_last)
-
-        print("init w:", self.w)
 
         with open("w.pl", "wb") as f:
             pickle.dump(self.w, f)
@@ -140,7 +140,7 @@ class LearningModel:
 
     def analyze_player(self, moves, score_last):
         n_moves = moves.shape[0]
-        n_times = int(2e6 / n_moves)
+        n_times = int(1e6 / n_moves)
 
         last_play = moves[-1]
         wtmp = self.w
