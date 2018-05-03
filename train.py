@@ -63,11 +63,12 @@ def play():
         g.printPlayerChess()
         g.printAIChess()
         if  steps % 2 == 0:
+            g.model1.logoppo(g.m_chessBoard.getBoardData(g.player2, g.player1))
             g.moveAIChess1(steps)
+            g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
         else:
             g.moveAIChess2(steps)
         steps += 1
-        g.model1.logmove(g.m_chessBoard.getBoardData(g.player1, g.player2))
 
     print("steps", steps)
     g.model1.analyze_result()

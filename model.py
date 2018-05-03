@@ -52,7 +52,9 @@ class LearningModel:
         self.w = np.zeros((self.m,1))
         self.mu = 0.000001
         self.lambd = 0.001
-        self.moves = np.array(self.board_init)
+        self.moves = None
+        self.oppo = None
+        #self.moves = np.array(self.board_init)
 
         for i in range(int(1e3*self.lambd)):
             self.calibrate()
@@ -105,9 +107,24 @@ class LearningModel:
 
     def logmove(self, x):
         x = np.array(x)
-        self.moves = np.vstack((self.moves, x))
+        if self.moves is None:
+            self.moves = x
+        else:
+            self.moves = np.vstack((self.moves, x))
+
+    def logoppo(self, x):
+        x = np.array(x)
+        if self.oppo is None:
+            self.oppo = x
+        else:
+            self.oppo = np.vstack((self.oppo, x))
 
     def analyze_result(self):
+
+        print(self.moves.shape)
+        print("oppo")
+        print(self.oppo.shape)
+        return
 
         last_play = self.moves[-1]
 
