@@ -302,7 +302,7 @@ class ChessBoard :
                     yield mid, chess, aft
 
     def possible_moves(self, player1, player2):
-        capture_moves = [x for x in self.captures(player1, player2)]
+        capture_moves = list(self.captures(player1, player2))
         valid = range(8)
 
         if len(capture_moves) > 0:
@@ -321,7 +321,7 @@ class ChessBoard :
                     yield None, chess, nx
 
     def can_capture(self, player1, player2):
-        captures = [x for x in self.captures(player1, player2)]
+        captures = list(self.captures(player1, player2))
         return True if captures else False
 
     """print chessboard"""
@@ -378,7 +378,7 @@ class ChessBoard :
         else:
             data.append(avg_dis/n_pawns)
 
-        num_capture = [x for x in self.captures(player1, player2)]
+        num_capture = list(self.captures(player1, player2))
         data.append(len(num_capture))
         return data
 
