@@ -40,7 +40,7 @@ class Game:
         print ("AI moving")
         if random.random() < RANDOM_MOVE:
             print("random!")
-            move = list(self.m_chessBoard.possible_moves(self.player2, self.player1))
+            moves = list(self.m_chessBoard.possible_moves(self.player2, self.player1))
             [(score, chessPrev, chessAft)] = random.sample(moves, 1)
         else:
             [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
