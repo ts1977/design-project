@@ -345,6 +345,18 @@ class ChessBoard :
 
     # obtain the parameter of the chesses on the board
     def getPlayerData(self, player1, player2):
+        
+        '''      
+        The 8 features:
+        1. number of own pieces
+        2. number of own kings
+        3. number of edge pieces
+        4. number of center pieces
+        5. aggregated distance between all pieces
+        6. number of guard pawns
+        7. average distance of every pawn to becoming a king
+        8. number of pieces possible to capture
+        '''
         data = []
 
         n_edge = 0
@@ -369,6 +381,8 @@ class ChessBoard :
                 agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2) / 100
 
         n_pieces = len(player1.chesses)
+ #       n_pieces2 = len(player2.chesses)
+ 
         data.append(n_pieces/12)
         data.append(len(player1.m_kings)/12)
 
@@ -379,7 +393,7 @@ class ChessBoard :
         else:
             data.append(n_edge/n_pieces)
             data.append(n_center/n_pieces)
-            data.append(agg_dis/n_pieces)
+            data.append(agg_dis/n_pieces) #useful for endgame where the machine has a tendency to avoid conflict
 
         if n_pawns == 0:
             data.append(0)
