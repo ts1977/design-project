@@ -46,6 +46,7 @@ class Player :
         self.num_friend = 0
         self.m_name = name
         self.m_model = LearningModel()
+
         for pos in startPositions:
             self.chesses.append(Chess(pos[0], pos[1]))
 
@@ -340,60 +341,37 @@ class ChessBoard :
         return self.m_player1.lost(self.m_player2) or self.m_player2.lost(self.m_player1)
 
     def reset(self):
-        self.m_player1.chesses = [[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]]
-        self.m_player2.chesses = [[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]]
+        self.m_player1.setChess([[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]])
+        self.m_player2.setChess([[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
 
     # obtain the parameter of the chesses on the board
     def getPlayerData(self, player1, player2):
-        data = []
+        def div(a, b):
+            if b == 0:
+                return 0
+            return (a/b)
 
-        n_edge = 0
-        n_guard = 0
-        avg_dis = 0
+        n_pieces = 0
+        n_kings = 0
         n_pawns = 0
-        n_center = 0
-        agg_dis = 0
+        n_edge = 0
+        n_x = 0
+        n_y = 0
 
         for chess in player1.chesses:
             if chess.m_y == 0 or chess.m_y == 7:
                 n_edge += 1
-            if 1 < chess.m_x < 6 and 1 < chess.m_y < 6:
-                n_center += 1
+
+            n_pieces += 1
             if chess not in player1.m_kings:
-                avg_dis += (abs(player2.home_row - chess.m_x) / 7)
                 n_pawns += 1
-                if chess.m_x == player1.home_row:
-                    n_guard += 1
+            else:
+                n_kings += 1
 
-            for opp in player2.chesses:
-                agg_dis += sqrt((chess.m_x - opp.m_x)**2 + (chess.m_y - opp.m_y)**2) / 100
+            n_x += chess.m_x
+            n_y += chess.m_y
 
-        n_pieces = len(player1.chesses)
-        data.append(n_pieces/12)
-        data.append(len(player1.m_kings)/12)
-
-        if n_pieces == 0:
-            data.append(0)
-            data.append(0)
-            data.append(0)
-        else:
-            data.append(n_edge/n_pieces)
-            data.append(n_center/n_pieces)
-            data.append(agg_dis/n_pieces)
-
-        if n_pawns == 0:
-            data.append(0)
-            data.append(0)
-        else:
-            data.append(n_guard/n_pawns)
-            data.append(avg_dis/n_pawns)
-
-        num_capture = list(self.captures(player1, player2))
-        n_opp = len(player2.chesses)
-        if n_opp == 0:
-            data.append(0)
-        else:
-            data.append(len(num_capture)/n_opp)
+        data = [n_pawns, n_kings, n_edge, div(n_x, n_pieces), div(n_x, n_pieces)]
 
         return data
 

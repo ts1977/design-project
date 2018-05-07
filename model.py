@@ -1,173 +1,76 @@
-
+# -*- coding: utf-8 -*-
+import random
 import numpy as np
-import time
-from datetime import datetime
-import pickle
-import os
+from collections import deque
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import Adam
+from keras import backend as K
+
+import pdb
 
 class LearningModel:
     def __init__(self):
-        '''
-        The baseline examples.
-        Each row is a feature vector of 6 features:
-        1. number of own pieces
-        2. number of opponent pieces
-        3. number of own kings
-        4. number of opponent kings
-        5. number of own pieces threatened
-        6. number of oppoenents pieces threatened
-        '''
+        self.m = 10
 
-        '''
-        These examples correspond to:
-        initial board,
-        winning,
-        losing
-        '''
-        '''
-        self.board_init = np.array(
-            [12, 0, 3, 4, 2, 851, 6.0, 0, 12, 0, 3, 4, 2, 851, 6.0, 0]
-        )
+        self.memory = deque(maxlen=2000)
+        self.gamma = 0.95    # discount rate
+        self.epsilon = 1.0  # exploration rate
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.99
+        self.learning_rate = 0.001
+        self.model = self._build_model()
+        self.target_model = self._build_model()
+        self.update_target_model()
 
-        complete = [12, 12, 12, 12, 12,    0, 0, 0]
-        reverse =  [ 0,  0,  0,  0,  0, 1000, 7, 0]
+    def _huber_loss(self, target, prediction):
+        # sqrt(1+error^2)-1
+        error = prediction - target
+        return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
 
-        self.base_x = np.array([
-                self.board_init,
-                complete + reverse,
-                reverse + complete
-        ])
-        '''
+    def _build_model(self):
+        # Neural Net for Deep-Q learning Model
+        model = Sequential()
+        model.add(Dense(24, input_dim=self.m, activation='relu'))
+        model.add(Dense(24, activation='relu'))
+        model.add(Dense(1, activation='linear'))
+        model.compile(loss=self._huber_loss,
+                      optimizer=Adam(lr=self.learning_rate))
+        return model
 
-        '''
-        initial board has score 0
-        winning has score 1000
-        losing has score -1000
-        '''
-        '''
-        self.base_y = np.array([
-            [    0],
-            [ 1000],
-            [-1000],
-        ])
-        '''
-        self.m = 16 #len(self.board_init) # number of features
-        self.w = np.random.random((self.m,1))
-        self.mu = 0.0000005
-        self.lambd = 0.001
-        self.moves = None
-        self.oppo = None
-        #self.moves = np.array(self.board_init)
+    def update_target_model(self):
+        self.target_model.set_weights(self.model.get_weights())
 
-        #for i in range(int(1e3*self.lambd)):
-        #    self.calibrate()
+    def remember(self, state, reward, next_state, done):
+        state = np.array(state).reshape(1, self.m)
+        next_state = np.array(next_state).reshape(1, self.m)
+        self.memory.append((state, reward, next_state, done))
 
-    # method used to evaluate a board as
-    # categorized by feature vector x
-    def eval(self, x):
-        assert(len(x) == len(self.w))
-        x = np.array(x)
-        r = x.dot(self.w)
-        return r.item()
+    def eval(self, state):
+        assert(len(state) == self.m)
+        state = np.array(state).reshape(1, self.m)
+        return self.model.predict(state).item()
 
-    # update the weights by evaluating the
-    # difference between the scores of vectors
-    # xold and xnew
-    def update(self, xnew, xold):
-        vnew = self.eval(xnew)
-        vold = self.eval(xold)
-        self.w += self.mu * (vnew - vold) * xold + self.lambd * self.w.sum()
+    def replay(self):
+        batch_size = min(len(self.memory), 128)
+        minibatch = random.sample(self.memory, batch_size)
 
-
-    # calibrate the feature examples toward the baseline examples
-    def calibrate(self):
-        delta = np.dot(self.base_x.T, self.base_y - self.base_x.dot(self.w) )
-        # regularize
-        delta += self.lambd * self.w.sum()
-        self.w += (self.mu/self.base_x.shape[0]) * delta
-
-    def reload_model(self):
-        print("loading model...", end='')
-
-        try:
-            with open("w.pl", "rb") as f:
-                self.w = pickle.load(f)
-            print("done")
-        except:
-            print("failed")
-
-    def mutate(self, model):
-        assert(len(model.w) == len(self.w))
-
-        idx = np.random.randint(self.m, size=self.m//2)
-
-        for i in range(self.m):
-            if i in idx:
-                r = np.random.uniform(low=1/10, high=10)
-                self.w[i] = r * model.w[i]
+        for state,reward, next_state, done in minibatch:
+            target = self.model.predict(state).item()
+            if done:
+                target = reward
             else:
-                self.w[i] = model.w[i]
+                t = self.target_model.predict(next_state).item()
+                target = reward + self.gamma * np.amax(t)
+            target = np.array([target])
+            self.model.fit(state, target, epochs=1, verbose=0)
 
-    def logmove(self, x):
-        x = np.array(x)
-        if self.moves is None:
-            self.moves = x
-        else:
-            self.moves = np.vstack((self.moves, x))
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
 
-    def logoppo(self, x):
-        x = np.array(x)
-        if self.oppo is None:
-            self.oppo = x
-        else:
-            self.oppo = np.vstack((self.oppo, x))
+    def load(self, name):
+        self.model.load_weights(name)
 
-    def analyze_result(self, win):
-
-        if win > 0:
-            score_last = 1000
-        elif win < 0:
-            score_last = -1000
-        else:
-            score_last = 0
-
-        print("init w:", self.w)
-
-        self.analyze_player(self.moves, score_last)
-        self.analyze_player(self.oppo, -score_last)
-
-        with open("w.pl", "wb") as f:
-            pickle.dump(self.w, f)
-
-        print("new w:", self.w)
-
-    def analyze_player(self, moves, score_last):
-        n_moves = moves.shape[0]
-        n_times = int(1e6 / n_moves)
-
-        last_play = moves[-1]
-        wtmp = self.w
-
-        for i in range(n_times):
-            print("iteration", i, "of", n_times, end='\r')
-
-            wtmp = wtmp + self.mu * (score_last - self.eval(list(last_play))) * last_play.reshape(self.m,1)
-            for i in range(n_moves-2, -1, -1):
-                curr = self.moves[i]
-                succ = self.moves[i+1]
-                wtmp = wtmp + self.mu * (self.eval(list(succ)) - self.eval(list(curr))) * curr.reshape(self.m,1)
-
-            self.w = wtmp
-
-            wtmp = wtmp + self.mu * (0 - self.eval(self.moves[0])) * self.moves[0].reshape(self.m,1)
-            for i in range(0, n_moves-1, 1):
-                curr = self.moves[i]
-                succ = self.moves[i+1]
-                wtmp = wtmp + self.mu * (self.eval(list(succ)) - self.eval((curr))) * curr.reshape(self.m,1)
-
-            self.w = wtmp
-
-        print("iteration", n_times, "of", n_times)
-
-
+    def save(self, name):
+        self.model.save_weights(name)
 
