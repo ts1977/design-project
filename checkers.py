@@ -133,6 +133,7 @@ class ChessBoard :
         self.m_player1.dir_pawns = [[1, 1], [1, -1]]
         self.m_player2.dir_pawns = [[-1, 1], [-1, -1]]
         self.m_curBoard = []
+        self.m_moves_wo_capture = 0
 
 
     """display chessboard"""
@@ -338,6 +339,8 @@ class ChessBoard :
 
     """return true when there is a winner"""
     def win(self):
+        if self.m_moves_wo_capture > 49:
+            return True
         return self.m_player1.lost(self.m_player2) or self.m_player2.lost(self.m_player1)
 
     def reset(self):
@@ -371,7 +374,7 @@ class ChessBoard :
             n_x += chess.m_x
             n_y += chess.m_y
 
-        data = [n_pawns, n_kings, n_edge, div(n_x, n_pieces), div(n_x, n_pieces)]
+        data = [n_pawns, n_kings, n_edge, div(n_x, n_pieces), div(n_y, n_pieces)]
 
         return data
 
@@ -485,17 +488,11 @@ class ChessBoard :
                 oppoChess.remove(chess)
             if chess in oppoKings:
                 oppoKings.remove(chess)
+            self.m_moves_wo_capture = 0
+        else:
+            self.m_moves_wo_capture += 1
         player.moveChess(chessPrev, chessAft)
 
-    def moveChess2(self, player, oppoChess, oppoKings, chessPrev, chessAft):
-        if abs(chessAft.m_x - chessPrev.m_x) >= 2 or abs(chessAft.m_y - chessPrev.m_y) >= 2:
-            # if oppo chess should be removed
-            chess = Chess((chessPrev.m_x+chessAft.m_x)/2, (chessPrev.m_y+chessAft.m_y)/2)
-            if chess in oppoChess:
-                oppoChess.remove(chess)
-            if chess in oppoKings:
-                oppoKings.remove(chess)
-        player.moveChess(chessPrev, chessAft)
     """return true if is at valid position"""
     def isValid(self,  aft_x, aft_y):
         if (aft_x < 0 or aft_x >= self.m_rows) or (aft_y < 0 or aft_y >= self.m_cols):

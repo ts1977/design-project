@@ -16,6 +16,8 @@ class Game:
         self.model2 = self.m_chessBoard.m_player2.m_model
     def end(self):
         return self.m_chessBoard.win()
+    def reset(self):
+        self.m_chessBoard = ChessBoard()
     def printChessTable(self):
         print (self.m_chessBoard)
     def printPlayerChess(self):
@@ -45,14 +47,14 @@ class Game:
         done = self.end()
         player.m_model.remember(state, len(player)-len(opp), next_state, done)
 
-def play():
+def train():
     g = Game()
-    g.model1.load('./save/model1.h5')
-    g.model2.load('./save/model2.h5')
-    g.setMaxSteps(2)
-    board = g.m_chessBoard
-    for e in range(2000):
-        board.reset()
+    g.model1.load('./save/model1')
+    g.model2.load('./save/model2')
+    g.setMaxSteps(1)
+    for e in range(101):
+        print(g.model1.epsilon)
+        g.reset()
         steps = 0
 
         while not g.end():
@@ -74,8 +76,8 @@ def play():
         g.model2.replay()
 
         if e % 10 == 0:
-            g.model1.save('./save/model1.h5')
-            g.model2.save('./save/model2.h5')
+            g.model1.save('./save/model1')
+            g.model2.save('./save/model2')
 
 if __name__ == '__main__':
-    play()
+    train()
