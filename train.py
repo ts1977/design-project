@@ -1,3 +1,4 @@
+
 from checkers import *
 import numpy as np
 import random
@@ -54,7 +55,7 @@ def train(f, episodes):
     f2 = './save/{}2'.format(f)
     g.model1.load(f1)
     g.model2.load(f2)
-    g.setMaxSteps(1)
+    g.setMaxSteps(3)
     for e in range(episodes):
         print(g.model1.epsilon)
         g.reset()

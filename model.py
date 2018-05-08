@@ -37,8 +37,8 @@ class LearningModel:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(24, input_dim=self.m, activation='tanh'))
-        model.add(Dense(24, activation='tanh'))
+        model.add(Dense(24, input_dim=self.m, activation='relu'))
+        model.add(Dense(24, activation='relu'))
         model.add(Dense(1, activation='linear'))
         model.compile(loss=self._huber_loss,
                       optimizer=Adam(lr=self.learning_rate))
@@ -49,7 +49,7 @@ class LearningModel:
         self.target_model_end.set_weights(self.model_end.get_weights())
 
     def endgame(self, state):
-        return (state[0] + state[1]) < 5 or (state[6] + state[7]) < 5
+        return ((state[0] + state[1]) < 6)or ((state[6] + state[7]) < 6)
 
     def remember(self, state, reward, next_state, done):
         s = state

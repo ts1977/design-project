@@ -359,6 +359,7 @@ class ChessBoard :
         n_kings = 0
         n_pawns = 0
         n_edge = 0
+        n_home = 0
         n_x = 0
         n_y = 0
 
@@ -371,6 +372,9 @@ class ChessBoard :
                 n_pawns += 1
             else:
                 n_kings += 1
+
+            if chess.m_x == player1.home_row:
+                n_home += 1
 
             n_x += chess.m_x
             n_y += chess.m_y
