@@ -33,14 +33,10 @@ class Game:
 
         state = self.board.getBoardData(player, opp)
 
-        if random.random() < player.m_model.epsilon:
-            moves = list(self.m_chessBoard.possible_moves(player, opp))
-            [(_, chessPrev, chessAft)] = random.sample(moves, 1)
-        else:
-            [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(player.m_model, player, opp, 1)
-            print("score = ", score)
+        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(player.m_model, player, opp, 1)
+        print("score = ", score)
 
-        print ("moving" + str(chessPrev) + ", to" + str(chessAft))
+        print ("moving {} to {}".format(chessPrev, chessAft))
         self.m_chessBoard.moveChess(player, opp.chesses, opp.m_kings, chessPrev, chessAft)
 
         next_state = self.board.getBoardData(player, opp)
