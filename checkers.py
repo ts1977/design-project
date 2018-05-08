@@ -293,6 +293,33 @@ class ChessBoard :
                 if aft not in player1.chesses and aft not in player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in player2.chesses:
                     yield mid, chess, aft
 
+    def movable(self, player1, player2):
+        validRange = range(8)
+        for chess in player1.chesses:
+            capture = False
+            move = False
+            if chess in player1.m_kings:
+                directions = DIR_KINGS
+            else:
+                directions = player1.dir_pawns
+            for d in directions:
+                mid = Chess(chess.m_x+d[0], chess.m_y+d[1])
+                aft = Chess(mid.m_x+d[0], mid.m_y+d[1])
+                if aft not in player1.chesses and aft not in player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in player2.chesses:
+                    capture = True
+                if mid not in player1.chesses and mid not in player2.chesses and mid.m_x in validRange and mid.m_y in validRange:
+                    move = True
+
+            if move and not capture:
+                yield chess
+
+    def is_loner(self, checker):
+        for d in DIR_KINGS:
+            adj = Chess(checker.m_x+d[0], checker.m_y+d[1])
+            if adj in self.m_player1.chesses or adj in self.m_player2.chesses:
+                return False
+        return True
+
     def possible_moves(self, player1, player2):
         capture_moves = list(self.captures(player1, player2))
         valid = range(8)
@@ -350,6 +377,7 @@ class ChessBoard :
         n_pawns = 0
         n_edge = 0
         n_home = 0
+        n_loner = 0
         n_x = 0
         n_y = 0
 
@@ -363,13 +391,32 @@ class ChessBoard :
             else:
                 n_kings += 1
 
+            if chess.m_x == chess.m_y:
+                n_diag += 1
+
             if chess.m_x == player1.home_row:
                 n_home += 1
 
-            n_x += chess.m_x
-            n_y += chess.m_y
+            if self.is_loner(chess):
+                n_loner += 1
 
-        data = [n_pawns, n_kings, n_edge, n_home, div(n_x, n_pieces), div(n_y, n_pieces)]
+            n_x += abs(chess.m_x - player1.home_row)
+            n_y += abs(chess.m_y - player1.home_row)
+
+        n_captures = len(list(self.captures(player1, player2)))
+        n_movable = len(list(self.movable(player1, player2)))
+
+        data = [
+                n_pawns,
+                n_kings,
+                n_edge,
+                n_home,
+                n_captures,
+                n_movable,
+                n_loner,
+                div(n_x, n_pieces),
+                div(n_y, n_pieces)
+            ]
 
         return data
 

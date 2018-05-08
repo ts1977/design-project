@@ -47,7 +47,7 @@ class Game:
 
         reward = len(player)-len(opp)
         done = self.end()
-        player.m_model.remember(state, len(player)-len(opp), next_state, done)
+        player.m_model.remember(state, reward, next_state, done)
 
 def train(f, episodes):
     g = Game()
