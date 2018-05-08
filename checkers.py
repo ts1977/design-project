@@ -379,7 +379,7 @@ class ChessBoard :
             n_x += chess.m_x
             n_y += chess.m_y
 
-        data = [n_pawns, n_kings, n_edge, div(n_x, n_pieces), div(n_y, n_pieces)]
+        data = [n_pawns, n_kings, n_edge, n_home, div(n_x, n_pieces), div(n_y, n_pieces)]
 
         return data
 
