@@ -174,16 +174,12 @@ class ChessBoard :
     def displayButton(self,win):
         mode1 = Rectangle(Point(750,600), Point(950,675))        
         mode2 = Rectangle(Point(750,700), Point(950,775))       
-        mode3 = Rectangle(Point(750,800), Point(950,875))       
         mode1.setFill("black")
         mode2.setFill("black")
-        mode3.setFill("black")
         mode1.draw(win)
         mode2.draw(win)
-        mode3.draw(win)
 
     def displayText(self, win):
-        
         message3 = Text(Point(850,630), 'Player vs Computer')
         message3.setTextColor('white')
         message3.setStyle('italic')
@@ -191,12 +187,6 @@ class ChessBoard :
         message3.draw(win)
 
         message = Text(Point(850,730), 'Computer vs Player')
-        message.setTextColor('white')
-        message.setStyle('italic')
-        message.setSize(15)
-        message.draw(win)
-
-        message = Text(Point(850,830), 'Computer vs Computer')
         message.setTextColor('white')
         message.setStyle('italic')
         message.setSize(15)
