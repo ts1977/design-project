@@ -8,8 +8,6 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import backend as K
 
-import pdb
-
 class LearningModel:
     def __init__(self):
         self.m = 10
@@ -25,10 +23,10 @@ class LearningModel:
 
         self.model_end = self._build_model()
         self.model_reg = self._build_model()
-        self.model = self._build_model()
 
         self.target_model_end  =self._build_model()
         self.target_model_reg  = self._build_model()
+
         self.update_target_model()
 
     def _huber_loss(self, target, prediction):
@@ -77,8 +75,8 @@ class LearningModel:
         self.replay_model(self.memory, self.model_reg, self.target_model_reg)
         self.replay_model(self.memory_end, self.model_end, self.target_model_end)
 
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        self.epsilon = max(self.epsilon*self.epsilon_decay,
+                          self.epsilon_min)
 
     def replay_model(self, memory, model, target_model):
         batch_size = min(len(memory), 256)

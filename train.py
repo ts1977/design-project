@@ -52,7 +52,7 @@ def train():
     g.model1.load('./save/model1')
     g.model2.load('./save/model2')
     g.setMaxSteps(1)
-    for e in range(101):
+    for e in range(5001):
         print(g.model1.epsilon)
         g.reset()
         steps = 0
