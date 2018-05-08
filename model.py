@@ -29,24 +29,35 @@ class LearningModel:
 
         self.update_target_model()
 
-    def _huber_loss(self, target, prediction):
-        # sqrt(1+error^2)-1
-        error = prediction - target
-        return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
-
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(24, input_dim=self.m, activation='relu'))
-        model.add(Dense(24, activation='relu'))
+        model.add(Dense(24, input_dim=self.m, activation='tanh'))
+        model.add(Dense(24, activation='tanh'))
         model.add(Dense(1, activation='linear'))
-        model.compile(loss=self._huber_loss,
+        model.compile(loss='mse',
                       optimizer=Adam(lr=self.learning_rate))
         return model
 
     def update_target_model(self):
         self.target_model_reg.set_weights(self.model_reg.get_weights())
         self.target_model_end.set_weights(self.model_end.get_weights())
+
+    def mutate(self, other):
+        self.model_reg.set_weights(other.model_reg.get_weights())
+        self.model_end.set_weights(other.model_end.get_weights())
+
+        self.weights_mutate(self.model_reg.get_weights())
+        self.weights_mutate(self.model_end.get_weights())
+        self.update_target_model()
+
+    def weights_mutate(self, weights):
+        for x in range(0, len(weights), 2):
+            for y in range(len(weights[x])):
+                for z in range(len(weights[x][y])):
+                    if np.random.uniform(0, 1) < 0.20:
+                        diff = random.uniform(-0.5,0.5)
+                        weights[x][y][z] += diff
 
     def endgame(self, state):
         return ((state[0] + state[1]) < 6)or ((state[6] + state[7]) < 6)
