@@ -10,7 +10,7 @@ from keras import backend as K
 
 class LearningModel:
     def __init__(self):
-        self.m = 10
+        self.m = 18
 
         self.memory = deque(maxlen=2000)
         self.memory_end = deque(maxlen=2000)
