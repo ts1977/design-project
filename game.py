@@ -45,13 +45,28 @@ class Game:
         done = self.end()
         player.m_model.remember(state, len(player)-len(opp), next_state, done)
 
-def play(second, model, train):
+def first_or_second(board, win):
+    board.displayButton(win)
+    board.displayText(win)
+
+    select = win.getMouse()
+    while True:
+        if select.y >= 600 and select.y <= 675:
+            return False
+        elif select.y >= 700 and select.y <= 775:
+            return True
+        
+        select = win.getMouse()
+
+def play(model, train):
     g = Game()
     board = g.m_chessBoard
     g.setMaxSteps(3)
     chess = Chess()
     win = GraphWin('Checkers', 1000, 1000)
     steps = 0
+
+    second = first_or_second(board, win)
 
     if second:
         human = g.player2
@@ -136,8 +151,7 @@ def play(second, model, train):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Machine Learning Checkers.')
-    parser.add_argument('--second', action='store_true')
     parser.add_argument('--model', default="model1")
     parser.add_argument('--train', action='store_true')
     args = parser.parse_args()
-    play(args.second, args.model, args.train)
+    play(args.model, args.train)
