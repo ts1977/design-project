@@ -92,10 +92,15 @@ class LearningModel:
             model.fit(state, target, epochs=1, verbose=0)
 
     def load(self, name):
-        self.model_reg.load_weights(name + '.h5')
-        self.model_end.load_weights(name + '.end.h5')
-        with open(name + '.epsilon.p', 'rb') as f:
-            self.epsilon = pickle.load(f)
+        print('loading model {}...'.format(name), end='')
+        try:
+            self.model_reg.load_weights(name + '.h5')
+            self.model_end.load_weights(name + '.end.h5')
+            with open(name + '.epsilon.p', 'rb') as f:
+                self.epsilon = pickle.load(f)
+            print('done')
+        except:
+            print('failed')
 
     def save(self, name):
         self.model_reg.save_weights(name + '.h5')

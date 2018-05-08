@@ -1,6 +1,7 @@
 from checkers import *
 import numpy as np
 import random
+import argparse
 
 class Game:
     def __init__(self):
@@ -47,12 +48,14 @@ class Game:
         done = self.end()
         player.m_model.remember(state, len(player)-len(opp), next_state, done)
 
-def train():
+def train(f, episodes):
     g = Game()
-    g.model1.load('./save/model1')
-    g.model2.load('./save/model2')
+    f1 = './save/{}1'.format(f)
+    f2 = './save/{}2'.format(f)
+    g.model1.load(f1)
+    g.model2.load(f2)
     g.setMaxSteps(1)
-    for e in range(5001):
+    for e in range(episodes):
         print(g.model1.epsilon)
         g.reset()
         steps = 0
@@ -69,6 +72,10 @@ def train():
 
         print("steps", steps)
 
+        with open('./save/{}.csv'.format(f), 'a+') as fo:
+            win = 1 if g.player2.lost(g.player1) else 0
+            fo.write('{},{}\n'.format(win, steps))
+
         g.model1.update_target_model()
         g.model2.update_target_model()
 
@@ -76,8 +83,12 @@ def train():
         g.model2.replay()
 
         if e % 10 == 0:
-            g.model1.save('./save/model1')
-            g.model2.save('./save/model2')
+            g.model1.save(f1)
+            g.model2.save(f2)
 
 if __name__ == '__main__':
-    train()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', default="model")
+    parser.add_argument('--episodes', default=1001, type=int)
+    args = parser.parse_args()
+    train(args.file, args.episodes)

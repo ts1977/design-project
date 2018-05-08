@@ -1,9 +1,12 @@
+
 from checkers import *
 import time
+import argparse
 
 class Game:
     def __init__(self):
         self.m_chessBoard = ChessBoard()
+        self.board = self.m_chessBoard
         self.player1 = self.m_chessBoard.m_player1
         self.player2 = self.m_chessBoard.m_player2
         self.m_player1Chess = self.m_chessBoard.m_player1.chesses
@@ -20,158 +23,103 @@ class Game:
         print (self.m_chessBoard.m_player1)
     def printAIChess(self):
         print (self.m_chessBoard.m_player2)
-    def movePlayer1Chess(self, chessPrev, chessAft):
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
-    def movePlayer2Chess(self, chessPrev, chessAft):
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
     def setMaxSteps(self, s):
         self.m_chessBoard.setMaxSteps(s)
-    def moveAIChess1(self,steps):
-        print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model2, self.player2, self.player1, 1)
-        print ("moving" + str(chessPrev) + ", to" + str(chessAft))
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player2, self.m_player1Chess, self.player1Kings, chessPrev, chessAft)
-    def moveAIChess2(self, steps):
-        print ("AI moving")
-        [_, chessPrev, chessAft] = self.m_chessBoard.oneStep(self.model1, self.player1, self.player2, 1)
-        print ("moving" + str(chessPrev) + ", to" + str(chessAft))
-        self.m_chessBoard.moveChess(self.m_chessBoard.m_player1, self.m_player2Chess, self.player2Kings, chessPrev, chessAft)
 
-if __name__ == '__main__':
+    def moveAI(self, player, opp):
+        state = self.board.getBoardData(player, opp)
+
+        if random.random() < player.m_model.epsilon:
+            moves = list(self.m_chessBoard.possible_moves(player, opp))
+            [(_, chessPrev, chessAft)] = random.sample(moves, 1)
+        else:
+            [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(player.m_model, player, opp, 1)
+            print("score = ", score)
+
+        print ("moving" + str(chessPrev) + ", to" + str(chessAft))
+        self.m_chessBoard.moveChess(player, opp.chesses, opp.m_kings, chessPrev, chessAft)
+
+        next_state = self.board.getBoardData(player, opp)
+
+        reward = len(player)-len(opp)
+        done = self.end()
+        player.m_model.remember(state, len(player)-len(opp), next_state, done)
+
+def play(second, model, train):
     g = Game()
+    board = g.m_chessBoard
     g.setMaxSteps(3)
     chess = Chess()
-    board = g.m_chessBoard
-    player1Chess= board.m_player1.chesses
-    player2Chess = board.m_player2.chesses
-    steps = 0
     win = GraphWin('Checkers', 1000, 1000)
+    steps = 0
 
-    g.m_chessBoard.displayButton(win)
-    g.m_chessBoard.displayText(win)
+    if second:
+        human = g.player2
+        mach  = g.player1
+    else:
+        human = g.player1
+        mach  = g.player2
 
-    g.model1.load('./save/model1')
-    g.model2.load('./save/model2')
+    f = './save/{}'.format(model)
+    mach.m_model.load(f)
 
-    select = win.getMouse()
-    while not (select.x >= 750 and select.x <= 950) and ((select.y >= 600 and select.y <= 675) or (select.y >= 700 and select.y <= 775) or (select.y >= 800 and select.y <= 875)):
-        select = win.getMouse()
+    while not g.end():
+        win.autoflush = False
+        board.displayBoard(win)
+        board.displayChess(win)
+        board.displayButton(win)
+        board.displayText(win)
+        win.autoflush = True
 
-    if select.y >= 600 and select.y <= 675:
-        while not g.end():
-            win.autoflush = False
-            g.m_chessBoard.displayBoard(win)
-            g.m_chessBoard.displayChess(win)
-            g.m_chessBoard.displayButton(win)
-            g.m_chessBoard.displayText(win)
-            win.autoflush = True
+        if  steps % 2 == int(second):
+            g.printChessTable()
+            g.printPlayerChess()
+            g.printAIChess()
 
-            if  steps % 2 == 0:
-                g.printChessTable()
-                g.printPlayerChess()
-                g.printAIChess()
-                [i, j] = g.m_chessBoard.position2Index(win.getMouse())
-                position = Point(i* board.m_chessH, j* board.m_chessW)
-                preChess = Chess(int(j), int(i))
-                if not preChess in player1Chess:
-                    continue
-                g.m_chessBoard.highlightChess(win, preChess)
-                [i, j] = g.m_chessBoard.position2Index(win.getMouse())
-                aftChess = Chess(int(j), int(i))
-                [delta_x, delta_y] = g.m_chessBoard.chessDirection(preChess, aftChess)
-                if delta_x == 0 or not g.m_chessBoard.isValid(aftChess.m_x, aftChess.m_y) or (aftChess.m_x - preChess.m_x)>2 or abs(aftChess.m_y - preChess.m_y)> 2 :
-                    g.m_chessBoard.displayError(win)
+            [i, j] = board.position2Index(win.getMouse())
+            position = Point(i* board.m_chessH, j* board.m_chessW)
+            preChess = Chess(int(j), int(i))
+            if not preChess in human.chesses:
+                continue
+            board.highlightChess(win, preChess)
+            [i, j] = board.position2Index(win.getMouse())
+            aftChess = Chess(int(j), int(i))
+            [delta_x, delta_y] = board.chessDirection(preChess, aftChess)
+
+            if (delta_x == 0 or
+                not board.isValid(aftChess.m_x, aftChess.m_y) or
+                abs(aftChess.m_y - preChess.m_y)> 2 or
+                (aftChess.m_x - preChess.m_x) > 2):
+                board.displayError(win)
+                continue
+
+            board.removeError(win)
+            status = board.move(preChess, [delta_x, delta_y], human.chesses, mach.chesses)
+
+            if board.can_capture(human, mach):
+                if  status != g.m_chessBoard.Status.CAPTURE:
+                    status = board.move(preChess, [delta_x, delta_y], human.chesses, mach.chesses)
+                    g.m_chessBoard.displayError2(win)
                     continue
                 else:
-                    g.m_chessBoard.removeError(win)
-                status = board.move(preChess, [delta_x, delta_y], player1Chess, player2Chess)
-                # status = board.move(preChess, aftChess, playerChess, oppoChess)
-                if g.m_chessBoard.can_capture(g.player1, g.player2):
-                    if  status != g.m_chessBoard.Status.CAPTURE:
-                        status = board.move(preChess, [delta_x, delta_y], player1Chess, player2Chess)
-                        g.m_chessBoard.displayError2(win)
-                        continue
-                    else:
-                        g.movePlayer1Chess(preChess, Chess(preChess.m_x+delta_x*2, preChess.m_y+delta_y*2))
-                        g.m_chessBoard.removeError(win)
-                else:
-                    if status == g.m_chessBoard.Status.PLAIN:
-                        g.movePlayer1Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))
-                    else:
-                        print ("Invalid move")
+                    aft = Chess(preChess.m_x+delta_x*2, preChess.m_y+delta_y*2)
+                    board.moveChess(human, mach.chesses, mach.m_kings, preChess, aft)
+                    board.removeError(win)
             else:
-                g.moveAIChess1(steps)
-            steps += 1
-
-    elif select.y >= 700 and select.y <= 775:
-        while not g.end():
-            win.autoflush = False
-            g.m_chessBoard.displayBoard(win)
-            g.m_chessBoard.displayChess(win)
-            g.m_chessBoard.displayButton(win)
-            g.m_chessBoard.displayText(win)
-            win.autoflush = True
-
-            if  steps % 2 == 1:
-                g.printChessTable()
-                g.printPlayerChess()
-                g.printAIChess()
-                [i, j] = g.m_chessBoard.position2Index(win.getMouse())
-                position = Point(i* board.m_chessH, j* board.m_chessW)
-
-                preChess = Chess(int(j), int(i))
-                if not preChess in player2Chess:
-                    continue
-                g.m_chessBoard.highlightChess(win, preChess)
-                [i, j] = g.m_chessBoard.position2Index(win.getMouse())
-                aftChess = Chess(int(j), int(i))
-                [delta_x, delta_y] = g.m_chessBoard.chessDirection2(preChess, aftChess)
-                if delta_x == 0 or not g.m_chessBoard.isValid(aftChess.m_x, aftChess.m_y) or (aftChess.m_x - preChess.m_x) < -2 or abs(aftChess.m_y - preChess.m_y) > 2 :
-                    g.m_chessBoard.displayError(win)
-                    continue
+                if status == g.m_chessBoard.Status.PLAIN:
+                    aft = Chess(preChess.m_x+delta_x, preChess.m_y+delta_y)
+                    board.moveChess(human, mach.chesses, mach.m_kings, preChess, aft)
                 else:
-                    g.m_chessBoard.removeError(win)
-                status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
-                # status = board.move(preChess, aftChess, playerChess, oppoChess)
-                if g.m_chessBoard.can_capture(g.player2, g.player1):
-                    if  status != g.m_chessBoard.Status.CAPTURE:
-                        status = board.move(preChess, [delta_x, delta_y], player2Chess, player1Chess)
-                        g.m_chessBoard.displayError2(win)
-                        continue
-                    else:
-                        g.movePlayer2Chess(preChess, Chess(preChess.m_x+delta_x*2, preChess.m_y+delta_y*2))
-                        g.m_chessBoard.removeError(win)
-                else:
-                    if status == g.m_chessBoard.Status.PLAIN:
-                        g.movePlayer2Chess(preChess, Chess(preChess.m_x+delta_x, preChess.m_y+delta_y))
-                    else:
-                        print ("Invalid move")
-            else:
-                g.moveAIChess2(steps)
-            steps += 1
+                    print ("Invalid move")
+        else:
+            g.moveAI(mach, human)
+        steps += 1
 
-    elif select.y >= 800 and select.y <= 875:
-        while not g.end():
-            win.autoflush = False
-            g.m_chessBoard.displayBoard(win)
-            g.m_chessBoard.displayChess(win)
-            g.m_chessBoard.displayButton(win)
-            g.m_chessBoard.displayText(win)
-            win.autoflush = True
-
-            if steps%2 == 0:
-                g.printChessTable()
-                g.printPlayerChess()
-                g.printAIChess()
-                g.moveAIChess2(steps)
-            else:
-                g.moveAIChess1(steps)
-            steps += 1
-
-    if len(g.m_chessBoard.m_player1.chesses) == 0:
+    if human.lost(mach):
         g.m_chessBoard.winText2(win)
     else:
         g.m_chessBoard.winText1(win)
+
     win.autoflush = False
     g.m_chessBoard.displayBoard(win)
     g.m_chessBoard.displayChess(win)
@@ -180,3 +128,16 @@ if __name__ == '__main__':
     win.autoflush = True
     win.getMouse()
     win.close()
+
+    if train:
+        mach.m_model.replay()
+        mach.m_model.update_target_model()
+        mach.m_model.save(f)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Machine Learning Checkers.')
+    parser.add_argument('--second', action='store_true')
+    parser.add_argument('--model', default="model1")
+    parser.add_argument('--train', action='store_true')
+    args = parser.parse_args()
+    play(args.second, args.model, args.train)
