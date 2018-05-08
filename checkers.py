@@ -346,6 +346,7 @@ class ChessBoard :
     def reset(self):
         self.m_player1.setChess([[0,1],[0,3],[0,5],[0,7],[1,0],[1,2],[1,4],[1,6],[2,1],[2,3],[2,5],[2,7]])
         self.m_player2.setChess([[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
+        self.m_moves_wo_capture = 0
 
     # obtain the parameter of the chesses on the board
     def getPlayerData(self, player1, player2):

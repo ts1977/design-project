@@ -17,7 +17,7 @@ class Game:
     def end(self):
         return self.m_chessBoard.win()
     def reset(self):
-        self.m_chessBoard = ChessBoard()
+        self.m_chessBoard.reset()
     def printChessTable(self):
         print (self.m_chessBoard)
     def printPlayerChess(self):
