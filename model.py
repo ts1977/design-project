@@ -8,6 +8,10 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import backend as K
 
+'''
+Model for the Learning Algorithm
+'''
+
 class LearningModel:
     def __init__(self):
         self.m = 18

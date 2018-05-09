@@ -3,6 +3,10 @@ from checkers import *
 import time
 import argparse
 
+'''
+Brings every aspect of the project together and runs the game
+'''
+
 class Game:
     def __init__(self):
         self.m_chessBoard = ChessBoard()

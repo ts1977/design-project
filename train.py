@@ -1,8 +1,12 @@
-
 from checkers import *
 import numpy as np
 import random
 import argparse
+
+'''
+This is the code that trains the machine player
+It runs two machine players against each other
+'''
 
 class Game:
     def __init__(self):
@@ -29,7 +33,7 @@ class Game:
     def setMaxSteps(self, s):
         self.m_chessBoard.setMaxSteps(s)
 
-    def moveAI(self, player, opp):
+    def moveAI(self, player, opp): #machine player turn
 
         state = self.board.getBoardData(player, opp)
 
@@ -49,7 +53,7 @@ class Game:
         done = self.end()
         player.m_model.remember(state, reward, next_state, done)
 
-def train(f, episodes):
+def train(f, episodes): #training model
     g = Game()
     f1 = './save/{}1'.format(f)
     f2 = './save/{}2'.format(f)

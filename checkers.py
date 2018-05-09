@@ -7,6 +7,12 @@ import random
 from model import LearningModel
 from math import sqrt
 
+'''
+Contains the graphics to display the game
+along with the basic rules 
+and the parameters for the machine player
+'''
+
 p_piece = random.randint(0, 1)
 p_king = random.randint(1, 100)
 p_edge = random.randint(1, 30)
