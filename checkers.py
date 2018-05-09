@@ -356,7 +356,7 @@ class ChessBoard :
 
     """return true when there is a winner"""
     def win(self):
-        if self.m_moves_wo_capture > 49:
+        if self.m_moves_wo_capture > 99:
             return True
         return self.m_player1.lost(self.m_player2) or self.m_player2.lost(self.m_player1)
 
