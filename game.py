@@ -43,7 +43,7 @@ class Game:
         if done:
             if player.lost(opp):
                 reward = -12
-            elif opp.load(player):
+            elif opp.lost(player):
                 reward = 12
             else:
                 reward = -2
