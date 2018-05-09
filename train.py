@@ -47,6 +47,15 @@ class Game:
 
         reward = len(player)-len(opp)
         done = self.end()
+
+        if done:
+            if player.lost(opp):
+                reward = -12
+            elif opp.lost(player):
+                reward = 12
+            else:
+                reward = -2
+
         player.m_model.remember(state, reward, next_state, done)
 
 def train(f, episodes):

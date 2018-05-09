@@ -376,8 +376,6 @@ class ChessBoard :
         n_kings = 0
         n_pawns = 0
         n_edge = 0
-        n_home = 0
-        n_loner = 0
         n_x = 0
         n_y = 0
 
@@ -391,29 +389,13 @@ class ChessBoard :
             else:
                 n_kings += 1
 
-            if chess.m_x == chess.m_y:
-                n_diag += 1
-
-            if chess.m_x == player1.home_row:
-                n_home += 1
-
-            if self.is_loner(chess):
-                n_loner += 1
-
             n_x += abs(chess.m_x - player1.home_row)
             n_y += abs(chess.m_y - player1.home_row)
-
-        n_captures = len(list(self.captures(player1, player2)))
-        n_movable = len(list(self.movable(player1, player2)))
 
         data = [
                 n_pawns,
                 n_kings,
                 n_edge,
-                n_home,
-                n_captures,
-                n_movable,
-                n_loner,
                 div(n_x, n_pieces),
                 div(n_y, n_pieces)
             ]

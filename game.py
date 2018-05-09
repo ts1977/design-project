@@ -29,12 +29,8 @@ class Game:
     def moveAI(self, player, opp):
         state = self.board.getBoardData(player, opp)
 
-        if random.random() < player.m_model.epsilon:
-            moves = list(self.m_chessBoard.possible_moves(player, opp))
-            [(_, chessPrev, chessAft)] = random.sample(moves, 1)
-        else:
-            [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(player.m_model, player, opp, 1)
-            print("score = ", score)
+        [score, chessPrev, chessAft] = self.m_chessBoard.oneStep(player.m_model, player, opp, 1)
+        print("score = ", score)
 
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(player, opp.chesses, opp.m_kings, chessPrev, chessAft)
@@ -43,7 +39,16 @@ class Game:
 
         reward = len(player)-len(opp)
         done = self.end()
-        player.m_model.remember(state, len(player)-len(opp), next_state, done)
+
+        if done:
+            if player.lost(opp):
+                reward = -12
+            elif opp.load(player):
+                reward = 12
+            else:
+                reward = -2
+
+        player.m_model.remember(state, reward, next_state, done)
 
 def first_or_second(board, win):
     board.displayButton(win)
@@ -55,7 +60,7 @@ def first_or_second(board, win):
             return False
         elif select.y >= 700 and select.y <= 775:
             return True
-        
+
         select = win.getMouse()
 
 def play(model, train):

@@ -10,10 +10,9 @@ from keras import backend as K
 
 class LearningModel:
     def __init__(self):
-        self.m = 18
+        self.m = 10
 
         self.memory = deque(maxlen=2000)
-        self.memory_end = deque(maxlen=2000)
 
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
@@ -21,12 +20,8 @@ class LearningModel:
         self.epsilon_decay = 0.99
         self.learning_rate = 0.001
 
-        self.model_end = self._build_model()
-        self.model_reg = self._build_model()
-
-        self.target_model_end  =self._build_model()
-        self.target_model_reg  = self._build_model()
-
+        self.model = self._build_model()
+        self.target_model =self._build_model()
         self.update_target_model()
 
     def _build_model(self):
@@ -40,73 +35,40 @@ class LearningModel:
         return model
 
     def update_target_model(self):
-        self.target_model_reg.set_weights(self.model_reg.get_weights())
-        self.target_model_end.set_weights(self.model_end.get_weights())
-
-    def mutate(self, other):
-        self.model_reg.set_weights(other.model_reg.get_weights())
-        self.model_end.set_weights(other.model_end.get_weights())
-
-        self.weights_mutate(self.model_reg.get_weights())
-        self.weights_mutate(self.model_end.get_weights())
-        self.update_target_model()
-
-    def weights_mutate(self, weights):
-        for x in range(0, len(weights), 2):
-            for y in range(len(weights[x])):
-                for z in range(len(weights[x][y])):
-                    if np.random.uniform(0, 1) < 0.20:
-                        diff = random.uniform(-0.5,0.5)
-                        weights[x][y][z] += diff
-
-    def endgame(self, state):
-        return ((state[0] + state[1]) < 6)or ((state[6] + state[7]) < 6)
+        self.target_model.set_weights(self.model.get_weights())
 
     def remember(self, state, reward, next_state, done):
-        s = state
         state = np.array(state).reshape(1, self.m)
         next_state = np.array(next_state).reshape(1, self.m)
-
-        if self.endgame(s):
-            self.memory_end.append((state, reward, next_state, done))
-        else:
-            self.memory.append((state, reward, next_state, done))
+        self.memory.append((state, reward, next_state, done))
 
     def eval(self, state):
         assert(len(state) == self.m)
-        s = state
         state = np.array(state).reshape(1, self.m)
-
-        if self.endgame(s):
-            return self.model_end.predict(state).item()
-        else:
-            return self.model_reg.predict(state).item()
+        return self.model.predict(state).item()
 
     def replay(self):
-        self.replay_model(self.memory, self.model_reg, self.target_model_reg)
-        self.replay_model(self.memory_end, self.model_end, self.target_model_end)
+        batch_size = min(len(self.memory), 256)
+        minibatch = random.sample(self.memory, batch_size)
 
-        self.epsilon = max(self.epsilon*self.epsilon_decay,
-                          self.epsilon_min)
-
-    def replay_model(self, memory, model, target_model):
-        batch_size = min(len(memory), 256)
-        minibatch = random.sample(memory, batch_size)
         for state,reward, next_state, done in minibatch:
-            target = model.predict(state).item()
+            target = self.model.predict(state).item()
             if done:
                 target = reward
             else:
-                t = target_model.predict(next_state).item()
+                t = self.target_model.predict(next_state).item()
                 target = reward + self.gamma * np.amax(t)
             target = np.array([target])
-            model.fit(state, target, epochs=1, verbose=0)
+            self.model.fit(state, target, epochs=1, verbose=0)
+
+            self.epsilon = max(self.epsilon*self.epsilon_decay,
+                    self.epsilon_min)
+
 
     def load(self, name):
         print('loading model {}...'.format(name), end='')
         try:
-            self.model_reg.load_weights(name + '.h5')
-            self.model_end.load_weights(name + '.end.h5')
+            self.model.load_weights(name + '.h5')
             with open(name + '.epsilon.p', 'rb') as f:
                 self.epsilon = pickle.load(f)
             print('done')
@@ -114,7 +76,6 @@ class LearningModel:
             print('failed')
 
     def save(self, name):
-        self.model_reg.save_weights(name + '.h5')
-        self.model_end.save_weights(name + '.end.h5')
+        self.model.save_weights(name + '.h5')
         with open(name + '.epsilon.p', 'wb') as f:
             pickle.dump(self.epsilon, f)
