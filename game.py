@@ -104,12 +104,17 @@ def play(model, train):
             board.highlightChess(win, preChess)
             [i, j] = board.position2Index(win.getMouse())
             aftChess = Chess(int(j), int(i))
-            [delta_x, delta_y] = board.chessDirection(preChess, aftChess)
+
+            if second:
+                [delta_x, delta_y] = board.chessDirection2(preChess, aftChess)
+            else:
+                [delta_x, delta_y] = board.chessDirection(preChess, aftChess)
 
             if (delta_x == 0 or
                 not board.isValid(aftChess.m_x, aftChess.m_y) or
                 abs(aftChess.m_y - preChess.m_y)> 2 or
-                (aftChess.m_x - preChess.m_x) > 2):
+                (not second and (aftChess.m_x - preChess.m_x) > 2) or
+                (second and (aftChess.m_x - preChess.m_x) < -2)):
                 board.displayError(win)
                 continue
 
