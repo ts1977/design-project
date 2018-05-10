@@ -61,7 +61,7 @@ class LearningModel:
             target = np.array([target])
             self.model.fit(state, target, epochs=1, verbose=0)
 
-            self.epsilon = max(self.epsilon*self.epsilon_decay,
+        self.epsilon = max(self.epsilon*self.epsilon_decay,
                     self.epsilon_min)
 
 
