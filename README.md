@@ -69,5 +69,6 @@ To make an update to the weights we do: &omega; <- &omega; + &alpha; * (h(x<sub>
 * Python3
 * Keras
 * Numpy
+* Tk (for graphics)
 
 We used anaconda3 for this project.
