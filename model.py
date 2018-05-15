@@ -54,6 +54,19 @@ class LearningModel:
         state = np.array(state).reshape(1, self.m)
         return self.model.predict(state).item()
 
+    def mutate(self, other):
+        self.model.set_weights(other.model.get_weights())
+        self.weights_mutate(self.model.get_weights())
+        self.update_target_model()
+
+    def weights_mutate(self, weights):
+        for x in range(0, len(weights), 2):
+            for y in range(len(weights[x])):
+                for z in range(len(weights[x][y])):
+                    if np.random.uniform(0, 1) < 0.20:
+                        diff = random.uniform(-0.5,0.5)
+                        weights[x][y][z] += diff
+
     # learn from the game results
     def replay(self):
         batch_size = min(len(self.memory), 256)
