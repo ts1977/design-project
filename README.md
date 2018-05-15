@@ -63,3 +63,11 @@ We can thus accumulate a training set of data, which contains pairs of moves mad
 We can then use the standard gradient descent algorithm to train the weights on the data. There a few variation s that we will try. Either we will store all the data, and on each turn update the weights by doing a single step of gradient descent. Alternatively, we can use online learning, in which we use each board transition as it occurs to make an update, and then discard the training example. If we use online learning, we would probably need to do an update against the baseline truth examples (at some set interval) to make sure that the weights do not stray too far (the fear is that we rely too much on our estimation of the opponent as always making the best choice). (Alternatively, we could use a data aging process, were older data is slowly devalued, and then eventually discarded).
 
 To make an update to the weights we do: &omega; <- &omega; + &alpha; * (h(x<sub>n+1</sub>) - h(x<sub>n</sub>))
+
+## Dependencies
+
+* Python3
+* Keras
+* Numpy
+
+We used anaconda3 for this project.
