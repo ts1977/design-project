@@ -312,7 +312,7 @@ class ChessBoard :
                 return False
         return True
 
-    # all possible moves that the player can make
+    # all possible (i.e. legal) moves that the player can make
     def possible_moves(self, player1, player2):
         capture_moves = list(self.captures(player1, player2))
         valid = range(8)
