@@ -1,3 +1,27 @@
+"""
+Train AI players
+
+Takes the following parameters:
+    --file: the file to store the learned model to disk.
+
+            Given a value of <file>, this program produce the
+            files: <file>1.h5, stores the weights first agent
+                   <file>1.epsilon.p, stores the exploration rate
+
+                   <file>2.h5 and <file>2.epsilon.p store the same
+                   info for the second agent.
+
+                   <file>.csv stores the win-loss record of the agent.
+                   Each row correspond to a played game.
+                   The first column is a 1 if the agent1 was the winner,
+                   and 0 is the agent2 was the winner. The second column
+                   is the number of moves played in that game.
+
+            These files are stored in the save directory.
+
+    --episodes: The number of games to play
+"""
+
 
 from checkers import *
 import numpy as np
@@ -64,12 +88,16 @@ def train(f, episodes):
     f2 = './save/{}2'.format(f)
     g.model1.load(f1)
     g.model2.load(f2)
+
+    # use 3 rounds of lookahead minimax
     g.setMaxSteps(3)
+
     for e in range(episodes):
         print(g.model1.epsilon)
         g.reset()
         steps = 0
 
+        # play a game
         while not g.end():
             g.printChessTable()
             g.printPlayerChess()
@@ -89,6 +117,8 @@ def train(f, episodes):
         g.model1.update_target_model()
         g.model2.update_target_model()
 
+        # learn from the game
+        # apply learning algo
         g.model1.replay()
         g.model2.replay()
 

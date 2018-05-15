@@ -47,6 +47,8 @@ class Game:
 
 TURNS = 5
 
+# stage a match between two models
+# winner is decided by best of 5
 def match(m1, m2):
     g = Game()
     g.setMaxSteps(3)
@@ -91,6 +93,7 @@ def match(m1, m2):
 
     return m1 if wins1 > TURNS//2 else m2
 
+# play a tournament round with 8 contestants
 def tournament_round(models):
     random.shuffle(models)
 
@@ -131,4 +134,5 @@ if __name__ == '__main__':
     parser.add_argument('--file', default="t1")
     parser.add_argument('--rounds', default=1000, type=int)
     args = parser.parse_args()
+
     tournament(args.file, args.rounds)

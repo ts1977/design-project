@@ -1,3 +1,20 @@
+"""
+Use the GUI to play Computer
+
+Arguments:
+
+    --model: takes an argument which select a model file
+             to load for the opponent
+
+            For example, given a file x1.h5 in the 'save'
+            directory use, --model x1, without .h5 extension
+
+            By default, will use file called model1
+
+    --train: optional, takes no arguments
+             Indicates that you want the AI to be trained
+             on the outcome of the game.
+"""
 
 from checkers import *
 import time
@@ -50,6 +67,7 @@ class Game:
 
         player.m_model.remember(state, reward, next_state, done)
 
+# prompt user if he want to play first or second
 def first_or_second(board, win):
     board.displayButton(win)
     board.displayText(win)
@@ -92,6 +110,9 @@ def play(model, train):
         win.autoflush = True
 
         if  steps % 2 == int(second):
+            # human players turn
+            # grab mouse input, and apply the move
+
             g.printChessTable()
             g.printPlayerChess()
             g.printAIChess()
@@ -137,6 +158,7 @@ def play(model, train):
                 else:
                     print ("Invalid move")
         else:
+            # machine move
             g.moveAI(mach, human)
         steps += 1
 

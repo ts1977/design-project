@@ -46,7 +46,7 @@ Fourth two weeks: apply the artificial intelligence algorithms to the game. The 
 Fifth two weeks: Improve the algorithms. Add more details and make it play like a human player.
 Sixth two weeks: debug the program and fix all errors.
 
-## Learning Algorithm
+## Linear Learning Algorithm
 
 The Learning Algorithm we will develop will use a mixture of supervised and unsupervised techniques.
 

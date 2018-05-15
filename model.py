@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 import random
 import numpy as np
 import pickle
@@ -10,12 +10,13 @@ from keras import backend as K
 
 class LearningModel:
     def __init__(self):
+        # the number of features
         self.m = 10
 
         self.memory = deque(maxlen=2000)
 
         self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
+        self.epsilon = 1.0   # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.001
@@ -26,6 +27,10 @@ class LearningModel:
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
+
+        # Has 10 inputs, 2 hidden layers of 24 neurons
+        # and 1 linear output. Uses tanh activation
+
         model = Sequential()
         model.add(Dense(24, input_dim=self.m, activation='tanh'))
         model.add(Dense(24, activation='tanh'))
@@ -37,16 +42,19 @@ class LearningModel:
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
 
+    # log a move
     def remember(self, state, reward, next_state, done):
         state = np.array(state).reshape(1, self.m)
         next_state = np.array(next_state).reshape(1, self.m)
         self.memory.append((state, reward, next_state, done))
 
+    # evaluate a state
     def eval(self, state):
         assert(len(state) == self.m)
         state = np.array(state).reshape(1, self.m)
         return self.model.predict(state).item()
 
+    # learn from the game results
     def replay(self):
         batch_size = min(len(self.memory), 256)
         minibatch = random.sample(self.memory, batch_size)
@@ -54,16 +62,23 @@ class LearningModel:
         for state,reward, next_state, done in minibatch:
             target = self.model.predict(state).item()
             if done:
+                # target for last move is just the reward
                 target = reward
             else:
+                # target is the reward, plus the reward expected
+                # in the next_state
                 t = self.target_model.predict(next_state).item()
                 target = reward + self.gamma * np.amax(t)
             target = np.array([target])
+            # do one epoch of backpropogation
             self.model.fit(state, target, epochs=1, verbose=0)
 
+        # decay the exploration rate
         self.epsilon = max(self.epsilon*self.epsilon_decay,
                     self.epsilon_min)
 
+
+    # load and save model files
 
     def load(self, name):
         print('loading model {}...'.format(name), end='')

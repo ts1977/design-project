@@ -7,18 +7,6 @@ import random
 from model import LearningModel
 from math import sqrt
 
-p_piece = random.randint(0, 1)
-p_king = random.randint(1, 100)
-p_edge = random.randint(1, 30)
-p_neighbor = random.randint(1, 2)
-p_capture = random.randint(1, 50)
-
-a_piece = random.randint(0, 1)
-a_king = random.randint(1, 100)
-a_edge = random.randint(1, 30)
-a_neighbor = random.randint(1, 2)
-a_capture = random.randint(1, 50)
-
 class Chess:
     """initial for chess"""
     def __init__(self, x = 0, y = 0):
@@ -79,6 +67,7 @@ class Player :
         elif chessPrev not in self.m_kings and (chessAfter.m_x == 7 or chessAfter.m_x == 0):
             self.m_kings.append(chessAfter)
 
+    # did this player lose?
     def lost(self, opp):
         if len(self) == 0:
             return True
@@ -155,11 +144,11 @@ class ChessBoard :
     """display chess"""
     def displayChess(self, win):
         for chess in self.m_player1.chesses:
-            circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
+            circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR)
             circle.setFill("red")
             circle.draw(win)
         for chess in self.m_player2.chesses:
-            circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR) 
+            circle = Circle(Point(chess.m_y*self.m_chessW + self.m_chessW/2, chess.m_x*self.m_chessH + self.m_chessH/2), self.m_chessR)
             circle.setFill("blue")
             circle.draw(win)
         for chess in self.m_player1.m_kings:
@@ -172,8 +161,8 @@ class ChessBoard :
             square.draw(win)
 
     def displayButton(self,win):
-        mode1 = Rectangle(Point(750,600), Point(950,675))        
-        mode2 = Rectangle(Point(750,700), Point(950,775))       
+        mode1 = Rectangle(Point(750,600), Point(950,675))
+        mode2 = Rectangle(Point(750,700), Point(950,775))
         mode1.setFill("black")
         mode2.setFill("black")
         mode1.draw(win)
@@ -280,6 +269,7 @@ class ChessBoard :
         for chess in self.m_player2.chesses:
             self.m_curBoard[chess.m_x][chess.m_y] = 'X'
 
+    # find the capture moves
     def captures(self, player1, player2):
         validRange = range(8)
         for chess in player1.chesses:
@@ -293,6 +283,7 @@ class ChessBoard :
                 if aft not in player1.chesses and aft not in player2.chesses and aft.m_x in validRange and aft.m_y in validRange and mid in player2.chesses:
                     yield mid, chess, aft
 
+    # find the pieces that can makes move other than capture
     def movable(self, player1, player2):
         validRange = range(8)
         for chess in player1.chesses:
@@ -313,6 +304,7 @@ class ChessBoard :
             if move and not capture:
                 yield chess
 
+    # is this piece a loner checker
     def is_loner(self, checker):
         for d in DIR_KINGS:
             adj = Chess(checker.m_x+d[0], checker.m_y+d[1])
@@ -320,6 +312,7 @@ class ChessBoard :
                 return False
         return True
 
+    # all possible moves that the player can make
     def possible_moves(self, player1, player2):
         capture_moves = list(self.captures(player1, player2))
         valid = range(8)
@@ -365,8 +358,9 @@ class ChessBoard :
         self.m_player2.setChess([[5,0],[5,2],[5,4],[5,6],[6,1],[6,3],[6,5],[6,7],[7,0],[7,2],[7,4],[7,6]])
         self.m_moves_wo_capture = 0
 
-    # obtain the parameter of the chesses on the board
+    # obtain the features for a single player
     def getPlayerData(self, player1, player2):
+
         def div(a, b):
             if b == 0:
                 return 0
@@ -402,28 +396,14 @@ class ChessBoard :
 
         return data
 
+    # get the features for both players
     def getBoardData(self, player1, player2):
         data = []
         data.extend(self.getPlayerData(player1, player2))
         data.extend(self.getPlayerData(player2, player1))
         return data
 
-
-    def reverseMove(self, player1, player2, chessPrev, chessAft, remove_oppo, d):
-        myChess = player1.chesses
-        oppoChess = player2.chesses
-
-        myChess.remove(chessAft)
-        myChess.append(chessPrev)
-
-        if chessAft in player1.m_kings:
-            player1.m_kings.remove(chessAft)
-            player1.m_kings.append(chessPrev)
-
-        if remove_oppo:
-            oppoChess.append(Chess(chessPrev.m_x + d[0], chessPrev.m_y + d[1]))
-
-
+    """searches for the best move, performs recursive minimax strategy"""
     def oneStep(self, model, player1, player2, curStep):
         bestScore = None
         score = 0
@@ -436,6 +416,8 @@ class ChessBoard :
         oppoKings = player2.m_kings
 
         for captured, chess, nx_chess in self.possible_moves(player1, player2):
+
+            # apply the move
             myChess.remove(chess)
             myChess.append(nx_chess)
 
@@ -451,23 +433,30 @@ class ChessBoard :
                 else:
                     king_capture = False
 
+            # evaluate the move
             score = model.eval(self.getBoardData(player1, player2))
 
             if not self.win():
+                # only do minimax if the game is not over
+                # and we haven't exceeded lookahead maximum
                 if curStep < self.MAX_STEPS:
                     if captured:
+                        # search deeper if capture move
                         [nx, _, _] = self.oneStep(model, player2, player1, curStep)
                     else:
                         [nx, _, _] = self.oneStep(model, player2, player1, curStep + 1)
                     score -= nx
             else:
+                # infinite score for winning move
                 score = float('inf')
 
+            # is this the best score?
             if not bestScore or score > bestScore:
                 bestScore = score
                 maxChessPrev = chess
                 maxChessAft = nx_chess
 
+            # undo the move to revert to initial state
             myChess.remove(nx_chess)
             myChess.append(chess)
             if nx_chess in myKings:
@@ -479,6 +468,7 @@ class ChessBoard :
                 if king_capture:
                     oppoKings.append(captured)
 
+        # debugging, should never happen
         if bestScore is None:
             print(player1)
             print(player2)
