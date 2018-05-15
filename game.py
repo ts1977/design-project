@@ -9,7 +9,10 @@ Arguments:
             For example, given a file x1.h5 in the 'save'
             directory use, --model x1, without .h5 extension
 
-            By default, will use file called model1
+            By default, will use file it will used model1
+
+            We have included a bunch of pretrained models
+            in the save directory that can be tested.
 
     --train: optional, takes no arguments
              Indicates that you want the AI to be trained
