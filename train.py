@@ -55,18 +55,9 @@ class Game:
 
     def moveAI(self, player, opp):
 
-        model = player.m_model
+        state = self.board.getBoardData(player, opp)
 
-        model.next_state = self.board.getBoardData(player, opp)
-
-        if model.state and model.reward:
-            model.remember(
-                    model.state,
-                    model.reward,
-                    model.next_state,
-                    False)
-
-        if random.random() < model.epsilon:
+        if random.random() < player.m_model.epsilon:
             moves = list(self.m_chessBoard.possible_moves(player, opp))
             [(_, chessPrev, chessAft)] = random.sample(moves, 1)
         else:
@@ -76,29 +67,20 @@ class Game:
         print ("moving" + str(chessPrev) + ", to" + str(chessAft))
         self.m_chessBoard.moveChess(player, opp.chesses, opp.m_kings, chessPrev, chessAft)
 
-        model.state = self.board.getBoardData(player, opp)
-        model.reward = len(player)-len(opp)
+        next_state = self.board.getBoardData(player, opp)
 
-        if self.end():
+        reward = len(player)-len(opp)
+        done = self.end()
+
+        if done:
             if player.lost(opp):
                 reward = -12
             elif opp.lost(player):
                 reward = 12
             else:
-                reward = 0
+                reward = -2
 
-            player.m_model.remember(
-                    model.next_state,
-                    reward,
-                    model.state,
-                    True)
-
-            opp.m_model.remember(
-                    opp.m_model.state,
-                    -reward,
-                    model.state,
-                    True)
-
+        player.m_model.remember(state, reward, next_state, done)
 
 def train(f, episodes):
     g = Game()
