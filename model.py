@@ -8,6 +8,9 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import backend as K
 
+# Code was modified from:
+# https://keon.io/deep-q-learning/
+
 class LearningModel:
     def __init__(self):
         # the number of features

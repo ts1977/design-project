@@ -2,7 +2,8 @@
 Train AI players
 
 Takes the following parameters:
-    --file: the file to store the learned model to disk.
+
+    --model: the file to store the learned model to disk.
 
             Given a value of <file>, this program produce the
             files: <file>1.h5, stores the weights first agent
@@ -128,7 +129,7 @@ def train(f, episodes):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', default="model")
+    parser.add_argument('--model', default="model")
     parser.add_argument('--episodes', default=1001, type=int)
     args = parser.parse_args()
     train(args.file, args.episodes)
